@@ -1,0 +1,10 @@
+#Directories
+.target/
+/target/
+/.idea
+.vscode/
+target/
+
+#Files
+nb-configuration.xml
+nbactions.xml
