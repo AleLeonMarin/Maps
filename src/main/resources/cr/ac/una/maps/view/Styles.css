@@ -1,0 +1,83 @@
+
+
+.mainFxmlClass {
+
+
+    .border-pane-custom {
+        -fx-border-color: #3498db;
+        -fx-border-width: 3px;
+        -fx-border-radius: 5px; /* Ajusta el redondeado de las esquinas */
+        -fx-background-color: #1b1b1b;
+    }
+
+    .image-custom{
+        -fx-border-width: 3px;
+        -fx-border-radius: 20px;
+    }
+
+    .image-button, .image-button:pressed, .image-button:focused, .image-button:hover, .image-button:selected {
+        -fx-background-image: url("../resources/descarga-arrow.png");
+        -fx-background-repeat: no-repeat;
+        -fx-background-size: contain;
+        -fx-background-position: center;
+        -fx-background-color: transparent;
+        -fx-border-color: transparent;
+        -fx-padding: 0;
+        -fx-background-radius: 10;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 10, 0, 0, 2);
+        -fx-focus-color: transparent;
+        -fx-faint-focus-color: transparent;
+    }
+
+    .image-button-info, .image-button-info:pressed, .image-button-info:focused, .image-button-info:hover, .image-button-info:selected {
+        -fx-background-image: url("../resources/informacion.png");
+        -fx-background-repeat: no-repeat;
+        -fx-background-size: contain;
+        -fx-background-position: center;
+        -fx-background-color: transparent;
+        -fx-border-color: transparent;
+        -fx-padding: 0;
+        -fx-background-radius: 10;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 10, 0, 0, 2);
+        -fx-focus-color: transparent;
+        -fx-faint-focus-color: transparent;
+    }
+
+    .combo-box-custom {
+        -fx-background-color: #1b1b1b; /* Color de fondo oscuro */
+        -fx-border-color: #ffffff;     /* Color del borde */
+        -fx-border-radius: 10px;       /* Bordes redondeados */
+        -fx-background-radius: 15px;   /* Bordes del fondo redondeados */
+        -fx-padding: 5px;              /* Espaciado interno */
+        -fx-font-size: 14px;           /* Tamaño de la fuente */
+        -fx-text-fill: #ffffff;        /* Color del texto */
+        -fx-pref-width: 120px;         /* Ancho preferido del ComboBox */
+    }
+
+    .combo-box-popup .list-cell {
+        -fx-background-color: #2c2c2c; /* Fondo de las opciones */
+        -fx-text-fill: #ffffff;        /* Color del texto de las opciones */
+    }
+
+    .combo-box-custom:hover {
+        -fx-border-color: #ffffff; /* Cambia el borde cuando se pasa el mouse */
+    }
+
+    .combo-box-custom:focused {
+        -fx-border-color: #ffffff; /* Cambia el borde cuando se selecciona */
+    }
+
+    .button-custom, .button-custom:pressed, .button-custom:focused, .button-custom:hover, .button-custom:selected {
+        -fx-background-color: #1b1b1b; /* Fondo oscuro */
+        -fx-border-color: #5f5f5f;     /* Color del borde */
+        -fx-border-radius: 10px;       /* Bordes redondeados */
+        -fx-background-radius: 15px;   /* Bordes redondeados */
+        -fx-padding: 5px 15px;         /* Espaciado interno del botón */
+        -fx-text-fill: #ffffff;        /* Color del texto */
+        -fx-font-size: 14px;           /* Tamaño de la fuente */
+        -fx-pref-width: 100px;         /* Ancho preferido */
+    }
+
+
+
+}

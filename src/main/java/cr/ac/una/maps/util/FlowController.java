@@ -34,8 +34,8 @@ public class FlowController {
     private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
 
 
-    private static final double DEFAULT_WIDTH = 1050;
-    private static final double DEFAULT_HEIGHT = 620;
+    private static final double DEFAULT_WIDTH = 1195;
+    private static final double DEFAULT_HEIGHT = 770;
 
     private FlowController() {
     }
@@ -98,7 +98,7 @@ public class FlowController {
             this.mainStage.setScene(
 
                     //anadi un seteo de resolucion de pantalla
-                    new Scene(FXMLLoader.load(App.class.getResource("/cr/ac/una/datos/view/StartMenuView.fxml"), this.idioma), 1240, 800));
+                    new Scene(FXMLLoader.load(App.class.getResource("/cr/ac/una/maps/view/MainView.fxml"), this.idioma), 1240, 800));
             MFXThemeManager.addOn(this.mainStage.getScene(), Themes.DEFAULT, Themes.LEGACY);
             this.mainStage.show();
         } catch (IOException ex) {
