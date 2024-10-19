@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cr.ac.una.datos.util;
+package cr.ac.una.maps.util;
 
 import java.text.DecimalFormat;
 import java.text.ParsePosition;

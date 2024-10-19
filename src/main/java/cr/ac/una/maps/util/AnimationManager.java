@@ -1,4 +1,4 @@
-package cr.ac.una.datos.util;
+package cr.ac.una.maps.util;
 
 import javafx.animation.*;
 import javafx.scene.ImageCursor;

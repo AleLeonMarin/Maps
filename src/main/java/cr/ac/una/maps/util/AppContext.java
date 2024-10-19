@@ -1,4 +1,4 @@
-package cr.ac.una.datos.util;
+package cr.ac.una.maps.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;

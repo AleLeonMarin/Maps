@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cr.ac.una.datos.controller;
+package cr.ac.una.maps.controller;
 
 import javafx.scene.control.Control;
 import javafx.scene.image.Image;
