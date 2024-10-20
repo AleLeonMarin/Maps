@@ -8,12 +8,14 @@ public class MapEdge {
     private MapNode to;
     private double weight; // Peso de la arista (puede ser distancia, tiempo, etc.)
     boolean closed; // Estado de la calle (cerrada o abierta)
+    private boolean oneWay;
 
     public MapEdge(MapNode from, MapNode to, double weight) {
         this.from = from;
         this.to = to;
         this.weight = weight;
         this.closed = false;
+        this.oneWay = false;
     }
 
     public MapNode getFrom() {

@@ -40,52 +40,47 @@ public class MapGraph {
         return edges;
     }
 
-    // Método para encontrar la ruta más corta usando Dijkstra
-    public List<MapNode> findShortestPath(String startId, String endId) {
-        MapNode start = nodes.get(startId);
-        MapNode end = nodes.get(endId);
-
-        if (start == null || end == null) {
-            return null; // Si alguno de los nodos no existe
-        }
-
-        // Implementación de Dijkstra
-        Map<MapNode, Double> distancias = new HashMap<>();
+    // Método en la clase MapGraph para encontrar la ruta más corta usando Dijkstra
+    public List<MapNode> findShortestPath(String inicio, String fin) {
         Map<MapNode, MapNode> predecesores = new HashMap<>();
-        PriorityQueue<MapNode> cola = new PriorityQueue<>(Comparator.comparingDouble(distancias::get));
+        Map<MapNode, Double> distancias = new HashMap<>();
+        PriorityQueue<MapNode> cola = new PriorityQueue<>(Comparator.comparing(distancias::get));
 
-        for (MapNode nodo : nodes.values()) {
+        // Inicialización
+        for (MapNode nodo : this.getNodes()) {
             distancias.put(nodo, Double.MAX_VALUE);
         }
-        distancias.put(start, 0.0);
-        cola.add(start);
+        MapNode nodoInicio = getNode(inicio);
+        distancias.put(nodoInicio, 0.0);
+        cola.add(nodoInicio);
 
         while (!cola.isEmpty()) {
             MapNode actual = cola.poll();
-            if (actual.equals(end)) {
-                break;
-            }
+            if (actual.getId().equals(fin)) break;
 
+            // Recorremos los vecinos
             for (MapEdge arista : actual.getEdges()) {
-                MapNode vecino = arista.getTo();
-                if (!arista.closed) {
-                    double nuevaDistancia = distancias.get(actual) + arista.getWeight();
-                    if (nuevaDistancia < distancias.get(vecino)) {
-                        distancias.put(vecino, nuevaDistancia);
-                        predecesores.put(vecino, actual);
-                        cola.add(vecino);
-                    }
+                MapNode vecino = arista.getTo();  // Cambiado a getTo()
+                double nuevaDistancia = distancias.get(actual) + arista.getWeight();  // Cambiado a getWeight()
+                if (nuevaDistancia < distancias.get(vecino)) {
+                    distancias.put(vecino, nuevaDistancia);
+                    predecesores.put(vecino, actual);
+                    cola.add(vecino);
                 }
             }
         }
 
-        // Reconstruir el camino
-        List<MapNode> camino = new ArrayList<>();
-        for (MapNode nodo = end; nodo != null; nodo = predecesores.get(nodo)) {
-            camino.add(nodo);
+        // Reconstruir la ruta desde el nodo final
+        List<MapNode> ruta = new ArrayList<>();
+        MapNode actual = getNode(fin);
+        while (actual != null) {
+            ruta.add(0, actual); // Añadimos al inicio
+            actual = predecesores.get(actual);
         }
-        Collections.reverse(camino);
-        return camino;
+
+        return ruta;
     }
+
+
 }
 
