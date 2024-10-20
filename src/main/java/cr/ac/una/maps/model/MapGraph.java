@@ -18,15 +18,16 @@ public class MapGraph {
         nodes.put(id, new MapNode(id, x, y));
     }
 
-    public void addEdge(String fromId, String toId, double weight) {
+    public void addEdge(String fromId, String toId, double weight, boolean oneWay) {
         MapNode from = nodes.get(fromId);
         MapNode to = nodes.get(toId);
         if (from != null && to != null) {
-            MapEdge edge = new MapEdge(from, to, weight);
+            MapEdge edge = new MapEdge(from, to, weight, oneWay);  // Pasar el parámetro oneWay
             from.addEdge(edge);
             edges.add(edge);
         }
     }
+
 
     public MapNode getNode(String id) {
         return nodes.get(id);
@@ -58,14 +59,17 @@ public class MapGraph {
             MapNode actual = cola.poll();
             if (actual.getId().equals(fin)) break;
 
-            // Recorremos los vecinos
+            // Recorremos los vecinos (solo si es una calle válida)
             for (MapEdge arista : actual.getEdges()) {
-                MapNode vecino = arista.getTo();  // Cambiado a getTo()
-                double nuevaDistancia = distancias.get(actual) + arista.getWeight();  // Cambiado a getWeight()
-                if (nuevaDistancia < distancias.get(vecino)) {
-                    distancias.put(vecino, nuevaDistancia);
-                    predecesores.put(vecino, actual);
-                    cola.add(vecino);
+                if (!arista.isClosed() && (!arista.isOneWay() || arista.getFrom().equals(actual))) {
+                    // Solo considerar calles abiertas y respetar el sentido unidireccional
+                    MapNode vecino = arista.getTo();
+                    double nuevaDistancia = distancias.get(actual) + arista.getWeight();
+                    if (nuevaDistancia < distancias.get(vecino)) {
+                        distancias.put(vecino, nuevaDistancia);
+                        predecesores.put(vecino, actual);
+                        cola.add(vecino);
+                    }
                 }
             }
         }
@@ -74,7 +78,7 @@ public class MapGraph {
         List<MapNode> ruta = new ArrayList<>();
         MapNode actual = getNode(fin);
         while (actual != null) {
-            ruta.add(0, actual); // Añadimos al inicio
+            ruta.add(0, actual); // Añadir el nodo al inicio de la lista
             actual = predecesores.get(actual);
         }
 

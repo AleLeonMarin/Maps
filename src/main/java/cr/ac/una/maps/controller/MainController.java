@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -24,6 +25,8 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     private StackPane stackpaneMap;
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -164,133 +167,136 @@ public class MainController extends Controller implements Initializable {
         grafo.addNode("NC6", 487, 417);
 
         // Aristas según lo solicitado
-        grafo.addEdge("A", "X", calcularDistancia(318, 340, 267, 318));
-        grafo.addEdge("A", "B", calcularDistancia(318, 340, 349, 274));
-        grafo.addEdge("A", "NC4", calcularDistancia(318, 340, 331, 350));
+        grafo.addEdge("A", "X", calcularDistancia(318, 340, 267, 318), false);
+        grafo.addEdge("A", "B", calcularDistancia(318, 340, 349, 274), false);
+        grafo.addEdge("A", "NC4", calcularDistancia(318, 340, 331, 350), false);
 
-        grafo.addEdge("B", "A", calcularDistancia(349, 274, 318, 340));
-        grafo.addEdge("B", "E", calcularDistancia(349, 274, 421, 303));
-        grafo.addEdge("B", "C", calcularDistancia(349, 274, 369, 230));
+        grafo.addEdge("B", "A", calcularDistancia(349, 274, 318, 340), false);
+        grafo.addEdge("B", "E", calcularDistancia(349, 274, 421, 303), true);
+        grafo.addEdge("B", "C", calcularDistancia(349, 274, 369, 230), false);
 
-        grafo.addEdge("C", "B", calcularDistancia(369, 230, 349, 274));
-        grafo.addEdge("C", "D", calcularDistancia(369, 230, 439, 241));
+        grafo.addEdge("C", "B", calcularDistancia(369, 230, 349, 274), false);
+        //grafo.addEdge("C", "D", calcularDistancia(369, 230, 439, 241), false)//unidirecional d-c;
 
-        grafo.addEdge("D", "NC2", calcularDistancia(439, 241, 462, 247));
-        grafo.addEdge("D", "E", calcularDistancia(439, 241, 421, 303));
-        grafo.addEdge("D", "C", calcularDistancia(439, 241, 369, 230));
-        grafo.addEdge("D", "Y", calcularDistancia(439, 241, 440, 157));
+        //grafo.addEdge("D", "NC2", calcularDistancia(439, 241, 462, 247), false);//unidireccional nc2-d
+        //grafo.addEdge("D", "E", calcularDistancia(439, 241, 421, 303), false);//unidireccional d-e
+        grafo.addEdge("D", "C", calcularDistancia(439, 241, 369, 230), false);
+        grafo.addEdge("D", "Y", calcularDistancia(439, 241, 440, 157), false);
 
-        grafo.addEdge("E", "D", calcularDistancia(421, 303, 439, 241));
-        grafo.addEdge("E", "H", calcularDistancia(421, 303, 483, 330));
-        grafo.addEdge("E", "B", calcularDistancia(421, 303, 349, 274));
-        grafo.addEdge("E", "F", calcularDistancia(421, 303, 388, 373));
+        grafo.addEdge("E", "D", calcularDistancia(421, 303, 439, 241), false);
+        grafo.addEdge("E", "H", calcularDistancia(421, 303, 483, 330), false);
+        //grafo.addEdge("E", "B", calcularDistancia(421, 303, 349, 274), false);//unidireccional b-e
+        //grafo.addEdge("E", "F", calcularDistancia(421, 303, 388, 373), false);//unidireccional f-e
 
-        grafo.addEdge("F", "E", calcularDistancia(388, 373, 421, 303));
-        grafo.addEdge("F", "NC4", calcularDistancia(388, 373, 331, 350));
-        grafo.addEdge("F", "G", calcularDistancia(388, 373, 459, 400));
-        grafo.addEdge("F", "K", calcularDistancia(388, 373, 351, 455));
+        grafo.addEdge("F", "E", calcularDistancia(388, 373, 421, 303), false);
+        grafo.addEdge("F", "NC4", calcularDistancia(388, 373, 331, 350), false);
+        grafo.addEdge("F", "G", calcularDistancia(388, 373, 459, 400), false);
+        grafo.addEdge("F", "K", calcularDistancia(388, 373, 351, 455), false);
 
-        grafo.addEdge("G", "F", calcularDistancia(459, 400, 388, 373));
-        grafo.addEdge("G", "H", calcularDistancia(459, 400, 483, 330));
-        grafo.addEdge("G", "NC6", calcularDistancia(459, 400, 487, 417));
-        grafo.addEdge("G", "J", calcularDistancia(459, 400, 425, 484));
+        grafo.addEdge("G", "F", calcularDistancia(459, 400, 388, 373), false);
+       // grafo.addEdge("G", "H", calcularDistancia(459, 400, 483, 330), false);//unidirecional h-g
+        grafo.addEdge("G", "NC6", calcularDistancia(459, 400, 487, 417), false);
+        grafo.addEdge("G", "J", calcularDistancia(459, 400, 425, 484), false);
 
-        grafo.addEdge("H", "E", calcularDistancia(483, 330, 421, 303));
-        grafo.addEdge("H", "I", calcularDistancia(483, 330, 507, 261));
-        grafo.addEdge("H", "G", calcularDistancia(483, 330, 459, 400));
-        grafo.addEdge("H", "NC5", calcularDistancia(483, 330, 516, 347));
+       // grafo.addEdge("H", "E", calcularDistancia(483, 330, 421, 303), false);//unidireccional e-h
+        //grafo.addEdge("H", "I", calcularDistancia(483, 330, 507, 261), false);//unidirecional i-h
+        grafo.addEdge("H", "G", calcularDistancia(483, 330, 459, 400), false);
+        grafo.addEdge("H", "NC5", calcularDistancia(483, 330, 516, 347), false);
 
-        grafo.addEdge("I", "H", calcularDistancia(507, 261, 483, 330));
-        grafo.addEdge("I", "NC2", calcularDistancia(507, 261, 462, 247));
-        grafo.addEdge("I", "P", calcularDistancia(507, 261, 578, 293));
-        grafo.addEdge("I", "T", calcularDistancia(507, 261, 530, 191));
+        grafo.addEdge("I", "H", calcularDistancia(507, 261, 483, 330), false);
+        grafo.addEdge("I", "NC2", calcularDistancia(507, 261, 462, 247), false);
+        //grafo.addEdge("I", "P", calcularDistancia(507, 261, 578, 293), false);//unidireccional p-i
+       // grafo.addEdge("I", "T", calcularDistancia(507, 261, 530, 191), false);//unidireccional t-i
 
-        grafo.addEdge("J", "G", calcularDistancia(425, 484, 459, 400));
-        grafo.addEdge("J", "K", calcularDistancia(425, 484, 351, 455));
+        grafo.addEdge("J", "G", calcularDistancia(425, 484, 459, 400), false);
+        grafo.addEdge("J", "K", calcularDistancia(425, 484, 351, 455), false);
 
-        grafo.addEdge("K", "J", calcularDistancia(351, 455, 425, 484));
-        grafo.addEdge("K", "F", calcularDistancia(351, 455, 388, 373));
-        grafo.addEdge("K", "U", calcularDistancia(351, 455, 297, 576));
-        grafo.addEdge("K", "L", calcularDistancia(351, 455, 297, 434));
+        grafo.addEdge("K", "J", calcularDistancia(351, 455, 425, 484), false);
+        grafo.addEdge("K", "F", calcularDistancia(351, 455, 388, 373), false);
+        grafo.addEdge("K", "U", calcularDistancia(351, 455, 297, 576), false);
+        grafo.addEdge("K", "L", calcularDistancia(351, 455, 297, 434), false);
 
-        grafo.addEdge("M", "N", calcularDistancia(596, 458, 623, 390));
-        grafo.addEdge("M", "NC1", calcularDistancia(596, 458, 507, 423));
+        //grafo.addEdge("M", "N", calcularDistancia(596, 458, 623, 390), false);//bidireccional n-m
+        grafo.addEdge("M", "NC1", calcularDistancia(596, 458, 507, 423), false);
 
-        grafo.addEdge("N", "M", calcularDistancia(623, 390, 596, 458));
-        grafo.addEdge("N", "O", calcularDistancia(623, 390, 649, 319));
-        grafo.addEdge("N", "Q", calcularDistancia(623, 390, 555, 360));
+        grafo.addEdge("N", "M", calcularDistancia(623, 390, 596, 458), false);
+        //grafo.addEdge("N", "O", calcularDistancia(623, 390, 649, 319), false);//bidireccional o-n
+        //grafo.addEdge("N", "Q", calcularDistancia(623, 390, 555, 360), false);//bidireccional q-n
 
-        grafo.addEdge("L", "W", calcularDistancia(297, 434, 249, 406));  // Conexión L - W
-        grafo.addEdge("L", "NC4", calcularDistancia(297, 434, 331, 350));  // Conexión L - NC4
-        grafo.addEdge("L", "K", calcularDistancia(297, 434, 351, 455));  // Conexión L - K
+        grafo.addEdge("L", "W", calcularDistancia(297, 434, 249, 406), false);
+        grafo.addEdge("L", "NC4", calcularDistancia(297, 434, 331, 350), false);
+        grafo.addEdge("L", "K", calcularDistancia(297, 434, 351, 455), false);
 
-        grafo.addEdge("O", "N", calcularDistancia(649, 319, 623, 390));
-        grafo.addEdge("O", "BB", calcularDistancia(649, 319, 716, 347));
-        grafo.addEdge("O", "AA", calcularDistancia(649, 319, 675, 248));
-        grafo.addEdge("O", "P", calcularDistancia(649, 319, 578, 293));
+        grafo.addEdge("O", "N", calcularDistancia(649, 319, 623, 390), false);
+        //grafo.addEdge("O", "BB", calcularDistancia(649, 319, 716, 347), false);
+        //grafo.addEdge("O", "AA", calcularDistancia(649, 319, 675, 248), false);
+        grafo.addEdge("O", "P", calcularDistancia(649, 319, 578, 293), false);
 
-        grafo.addEdge("P", "O", calcularDistancia(578, 293, 649, 319));
-        grafo.addEdge("P", "S", calcularDistancia(578, 293, 607, 223));
-        grafo.addEdge("P", "Q", calcularDistancia(578, 293, 555, 360));
-        grafo.addEdge("P", "I", calcularDistancia(578, 293, 507, 261));
+        //grafo.addEdge("P", "O", calcularDistancia(578, 293, 649, 319), false);
+        grafo.addEdge("P", "S", calcularDistancia(578, 293, 607, 223), false);
+        //grafo.addEdge("P", "Q", calcularDistancia(578, 293, 555, 360), false);
+        grafo.addEdge("P", "I", calcularDistancia(578, 293, 507, 261), false);
 
-        grafo.addEdge("Q", "NC5", calcularDistancia(555, 360, 516, 347));
-        grafo.addEdge("Q", "P", calcularDistancia(555, 360, 578, 293));
-        grafo.addEdge("Q", "N", calcularDistancia(555, 360, 623, 390));
+        //grafo.addEdge("Q", "NC5", calcularDistancia(555, 360, 516, 347), false);
+        grafo.addEdge("Q", "P", calcularDistancia(555, 360, 578, 293), false);
+        grafo.addEdge("Q", "N", calcularDistancia(555, 360, 623, 390), false);
 
-        grafo.addEdge("R", "NC1", calcularDistancia(484, 505, 507, 423));
+        grafo.addEdge("R", "NC1", calcularDistancia(484, 505, 507, 423), false);
 
-        grafo.addEdge("S", "AA", calcularDistancia(607, 223, 675, 248));
-        grafo.addEdge("S", "T", calcularDistancia(607, 223, 530, 191));
-        grafo.addEdge("S", "Z", calcularDistancia(607, 223, 633, 150));
-        grafo.addEdge("S", "P", calcularDistancia(607, 223, 578, 293));
+        //grafo.addEdge("S", "AA", calcularDistancia(607, 223, 675, 248), false);
+        grafo.addEdge("S", "T", calcularDistancia(607, 223, 530, 191), false);
+        grafo.addEdge("S", "Z", calcularDistancia(607, 223, 633, 150), false);
+        //grafo.addEdge("S", "P", calcularDistancia(607, 223, 578, 293), false);
 
-        grafo.addEdge("T", "NC3", calcularDistancia(530, 191, 486, 176));
-        grafo.addEdge("T", "S", calcularDistancia(530, 191, 607, 223));
-        grafo.addEdge("T", "I", calcularDistancia(530, 191, 507, 261));
+        grafo.addEdge("T", "NC3", calcularDistancia(530, 191, 486, 176), false);
+        //grafo.addEdge("T", "S", calcularDistancia(530, 191, 607, 223), false);
+        grafo.addEdge("T", "I", calcularDistancia(530, 191, 507, 261), false);
 
-        grafo.addEdge("U", "K", calcularDistancia(297, 576, 351, 455));
+        grafo.addEdge("U", "K", calcularDistancia(297, 576, 351, 455), false);
 
-        grafo.addEdge("V", "W", calcularDistancia(223, 384, 249, 406));
-        grafo.addEdge("V", "X", calcularDistancia(223, 384, 267, 318));
+        grafo.addEdge("V", "W", calcularDistancia(223, 384, 249, 406), false);
+        grafo.addEdge("V", "X", calcularDistancia(223, 384, 267, 318), false);
 
-        grafo.addEdge("W", "V", calcularDistancia(249, 406, 223, 384));
-        grafo.addEdge("W", "L", calcularDistancia(249, 406, 297, 434));
+        grafo.addEdge("W", "V", calcularDistancia(249, 406, 223, 384), false);
+        grafo.addEdge("W", "L", calcularDistancia(249, 406, 297, 434), false);
 
-        grafo.addEdge("X", "A", calcularDistancia(267, 318, 318, 340));
+        grafo.addEdge("X", "A", calcularDistancia(267, 318, 318, 340), false);
+        grafo.addEdge("X", "V", calcularDistancia(318, 340, 267, 318), false);
 
-        grafo.addEdge("Y", "NC3", calcularDistancia(440, 157, 486, 176));
-        grafo.addEdge("Y", "D", calcularDistancia(440, 157, 439, 241));
+        grafo.addEdge("Y", "NC3", calcularDistancia(440, 157, 486, 176), false);
+       // grafo.addEdge("Y", "D", calcularDistancia(440, 157, 439, 241), false);
 
-        grafo.addEdge("Z", "S", calcularDistancia(633, 150, 607, 223));
+        //grafo.addEdge("Z", "S", calcularDistancia(633, 150, 607, 223), false);
 
-        grafo.addEdge("AA", "S", calcularDistancia(675, 248, 607, 223));
-        grafo.addEdge("AA", "O", calcularDistancia(675, 248, 649, 319));
+        grafo.addEdge("AA", "S", calcularDistancia(675, 248, 607, 223), false);
+        grafo.addEdge("AA", "O", calcularDistancia(675, 248, 649, 319), false);
 
-        grafo.addEdge("BB", "O", calcularDistancia(716, 347, 649, 319));
+        grafo.addEdge("BB", "O", calcularDistancia(716, 347, 649, 319), false);
 
-        grafo.addEdge("NC1", "NC6", calcularDistancia(507, 423, 487, 417));
-        grafo.addEdge("NC1", "M", calcularDistancia(507, 423, 596, 458));
-        grafo.addEdge("NC1", "R", calcularDistancia(507, 423, 484, 505));
+        grafo.addEdge("NC1", "NC6", calcularDistancia(507, 423, 487, 417), false);
+        grafo.addEdge("NC1", "M", calcularDistancia(507, 423, 596, 458), false);
+        //grafo.addEdge("NC1", "R", calcularDistancia(507, 423, 484, 505), false);
 
-        grafo.addEdge("NC2", "D", calcularDistancia(462, 247, 439, 241));
-        grafo.addEdge("NC2", "I", calcularDistancia(462, 247, 507, 261));
-        grafo.addEdge("NC2", "NC3", calcularDistancia(462, 247, 486, 176));
+        grafo.addEdge("NC2", "D", calcularDistancia(462, 247, 439, 241), false);
+        //grafo.addEdge("NC2", "I", calcularDistancia(462, 247, 507, 261), false);
+        grafo.addEdge("NC2", "NC3", calcularDistancia(462, 247, 486, 176), false);
 
-        grafo.addEdge("NC3", "Y", calcularDistancia(486, 176, 440, 157));
-        grafo.addEdge("NC3", "NC2", calcularDistancia(486, 176, 462, 247));
-        grafo.addEdge("NC3", "T", calcularDistancia(486, 176, 530, 191));
+        //grafo.addEdge("NC3", "Y", calcularDistancia(486, 176, 440, 157), false);
+        grafo.addEdge("NC3", "NC2", calcularDistancia(486, 176, 462, 247), false);
+        grafo.addEdge("NC3", "T", calcularDistancia(486, 176, 530, 191), false);
 
-        grafo.addEdge("NC4", "A", calcularDistancia(331, 350, 318, 340));
-        grafo.addEdge("NC4", "L", calcularDistancia(331, 350, 297, 434));
-        grafo.addEdge("NC4", "F", calcularDistancia(331, 350, 388, 373));
+        grafo.addEdge("NC4", "A", calcularDistancia(331, 350, 318, 340), false);
+        grafo.addEdge("NC4", "L", calcularDistancia(331, 350, 297, 434), false);
+        grafo.addEdge("NC4", "F", calcularDistancia(331, 350, 388, 373), false);
 
-        grafo.addEdge("NC5", "H", calcularDistancia(516, 347, 483, 330));
-        grafo.addEdge("NC5", "NC6", calcularDistancia(516, 347, 487, 417));
-        grafo.addEdge("NC5", "Q", calcularDistancia(516, 347, 555, 360));
+        //grafo.addEdge("NC5", "H", calcularDistancia(516, 347, 483, 330), false);
+        //grafo.addEdge("NC5", "NC6", calcularDistancia(516, 347, 487, 417), false);
+        grafo.addEdge("NC5", "Q", calcularDistancia(516, 347, 555, 360), false);
 
-        grafo.addEdge("NC6", "G", calcularDistancia(487, 417, 459, 400));
-        grafo.addEdge("NC6", "NC1", calcularDistancia(487, 417, 507, 423));
+        grafo.addEdge("NC6", "NC5", calcularDistancia(487, 417, 516, 347), false);
+        grafo.addEdge("NC6", "G", calcularDistancia(487, 417, 459, 400), false);
+        grafo.addEdge("NC6", "NC1", calcularDistancia(487, 417, 507, 423), false);
+
     }
 
 
