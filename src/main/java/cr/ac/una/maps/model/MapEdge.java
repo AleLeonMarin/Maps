@@ -27,6 +27,10 @@ public class MapEdge {
         return closed ? Double.MAX_VALUE : weight; // Si la calle está cerrada, asignar peso infinito
     }
 
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
     public void setClosed(boolean closed) {
         this.closed = closed;
     }
@@ -44,3 +48,4 @@ public class MapEdge {
         return from + " -> " + to + " (Weight: " + weight + ", OneWay: " + oneWay + ", Closed: " + closed + ")";
     }
 }
+

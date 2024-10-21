@@ -18,16 +18,17 @@ public class MapGraph {
         nodes.put(id, new MapNode(id, x, y));
     }
 
-    public void addEdge(String fromId, String toId, double weight, boolean oneWay) {
+    public MapEdge addEdge(String fromId, String toId, double weight, boolean oneWay) {
         MapNode from = nodes.get(fromId);
         MapNode to = nodes.get(toId);
         if (from != null && to != null) {
-            MapEdge edge = new MapEdge(from, to, weight, oneWay);  // Pasar el parámetro oneWay
+            MapEdge edge = new MapEdge(from, to, weight, oneWay); // Pasar el parámetro oneWay
             from.addEdge(edge);
             edges.add(edge);
+            return edge; // Devolver la arista creada
         }
+        return null; // Si no se pudo crear la arista
     }
-
 
     public MapNode getNode(String id) {
         return nodes.get(id);
@@ -39,6 +40,24 @@ public class MapGraph {
 
     public List<MapEdge> getEdges() {
         return edges;
+    }
+
+    // Método para aplicar tráfico pesado aleatoriamente en 5 aristas
+    public void aplicarTransitoPesadoAleatorio() {
+        Random rand = new Random();
+        List<MapEdge> aristasSeleccionadas = new ArrayList<>(edges);
+
+        // Verificar que haya al menos 5 aristas
+        if (aristasSeleccionadas.size() >= 5) {
+            Collections.shuffle(aristasSeleccionadas); // Aleatorizar la lista
+            for (int i = 0; i < 5; i++) {
+                MapEdge edge = aristasSeleccionadas.get(i);
+                edge.setWeight(edge.getWeight() * 2); // Duplicar el peso por tráfico pesado
+                System.out.println("Tráfico pesado aplicado en la arista: " + edge);
+            }
+        } else {
+            System.out.println("No hay suficientes aristas para aplicar tráfico pesado.");
+        }
     }
 
     // Método en la clase MapGraph para encontrar la ruta más corta usando Dijkstra
@@ -84,7 +103,8 @@ public class MapGraph {
 
         return ruta;
     }
-
-
 }
+
+
+
 
