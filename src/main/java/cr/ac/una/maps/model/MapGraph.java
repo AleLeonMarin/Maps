@@ -1,13 +1,11 @@
 package cr.ac.una.maps.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import java.util.*;
 
 public class MapGraph {
     private Map<String, MapNode> nodes; // Mapa de nodos por su ID
     private List<MapEdge> edges; // Lista de todas las aristas
+    private int[][] next; // Matriz de predecesores
 
     public MapGraph() {
         nodes = new HashMap<>();
@@ -42,12 +40,10 @@ public class MapGraph {
         return edges;
     }
 
-    // Método para aplicar tráfico pesado aleatoriamente en 5 aristas
     public void aplicarTransitoPesadoAleatorio() {
         Random rand = new Random();
         List<MapEdge> aristasSeleccionadas = new ArrayList<>(edges);
 
-        // Verificar que haya al menos 5 aristas
         if (aristasSeleccionadas.size() >= 5) {
             Collections.shuffle(aristasSeleccionadas); // Aleatorizar la lista
             for (int i = 0; i < 5; i++) {
@@ -60,13 +56,11 @@ public class MapGraph {
         }
     }
 
-    // Método en la clase MapGraph para encontrar la ruta más corta usando Dijkstra
     public List<MapNode> findShortestPath(String inicio, String fin) {
         Map<MapNode, MapNode> predecesores = new HashMap<>();
         Map<MapNode, Double> distancias = new HashMap<>();
         PriorityQueue<MapNode> cola = new PriorityQueue<>(Comparator.comparing(distancias::get));
 
-        // Inicialización
         for (MapNode nodo : this.getNodes()) {
             distancias.put(nodo, Double.MAX_VALUE);
         }
@@ -78,10 +72,8 @@ public class MapGraph {
             MapNode actual = cola.poll();
             if (actual.getId().equals(fin)) break;
 
-            // Recorremos los vecinos (solo si es una calle válida)
             for (MapEdge arista : actual.getEdges()) {
                 if (!arista.isClosed() && (!arista.isOneWay() || arista.getFrom().equals(actual))) {
-                    // Solo considerar calles abiertas y respetar el sentido unidireccional
                     MapNode vecino = arista.getTo();
                     double nuevaDistancia = distancias.get(actual) + arista.getWeight();
                     if (nuevaDistancia < distancias.get(vecino)) {
@@ -93,7 +85,6 @@ public class MapGraph {
             }
         }
 
-        // Reconstruir la ruta desde el nodo final
         List<MapNode> ruta = new ArrayList<>();
         MapNode actual = getNode(fin);
         while (actual != null) {
@@ -103,8 +94,63 @@ public class MapGraph {
 
         return ruta;
     }
+
+    public double[][] floydWarshall() {
+        int cantidadNodos = nodes.size();
+        double[][] distance = new double[cantidadNodos][cantidadNodos];
+        next = new int[cantidadNodos][cantidadNodos]; // Matriz de predecesores
+        MapNode[] nodeArray = nodes.values().toArray(new MapNode[0]);
+
+        for (int i = 0; i < cantidadNodos; i++) {
+            for (int j = 0; j < cantidadNodos; j++) {
+                if (i == j) {
+                    distance[i][j] = 0;
+                } else {
+                    distance[i][j] = Double.MAX_VALUE;
+                }
+                next[i][j] = -1; // Inicialmente, no hay predecesores
+            }
+        }
+
+        for (MapEdge edge : edges) {
+            int fromIndex = Arrays.asList(nodeArray).indexOf(edge.getFrom());
+            int toIndex = Arrays.asList(nodeArray).indexOf(edge.getTo());
+            distance[fromIndex][toIndex] = edge.getWeight();
+            next[fromIndex][toIndex] = toIndex;
+            if (!edge.isOneWay()) {
+                distance[toIndex][fromIndex] = edge.getWeight();
+                next[toIndex][fromIndex] = fromIndex;
+            }
+        }
+
+        for (int k = 0; k < cantidadNodos; k++) {
+            for (int i = 0; i < cantidadNodos; i++) {
+                for (int j = 0; j < cantidadNodos; j++) {
+                    if (distance[i][k] != Double.MAX_VALUE && distance[k][j] != Double.MAX_VALUE &&
+                            distance[i][k] + distance[k][j] < distance[i][j]) {
+                        distance[i][j] = distance[i][k] + distance[k][j];
+                        next[i][j] = next[i][k]; // Actualizamos el predecesor
+                    }
+                }
+            }
+        }
+
+        return distance;
+    }
+
+    public int[][] getNextMatrix() {
+        return next;
+    }
+
+    public List<MapNode> getPathFromFloydWarshall(int start, int end, int[][] next) {
+        List<MapNode> path = new ArrayList<>();
+        if (next[start][end] == -1) return path; // No hay camino
+
+        path.add(nodes.values().toArray(new MapNode[0])[start]);
+        while (start != end) {
+            start = next[start][end];
+            path.add(nodes.values().toArray(new MapNode[0])[start]);
+        }
+        return path;
+    }
 }
-
-
-
-

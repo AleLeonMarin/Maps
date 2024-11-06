@@ -75,7 +75,6 @@ public class MainController extends Controller implements Initializable {
     }
 
 
-
     private void manejarClickEnMapa(double x, double y) {
         // Convertir el clic a una coordenada de nodo
         MapNode nodoClic = encontrarNodoCercano(x, y);
@@ -96,10 +95,23 @@ public class MainController extends Controller implements Initializable {
             System.out.println("Punto B seleccionado: " + puntoB);
             dibujarNodo(puntoB, Color.BLUE); // Dibuja en azul el punto B
 
-            // Calcular la ruta más corta entre puntoA y puntoB
-            List<MapNode> ruta = grafo.findShortestPath(puntoA.getId(), puntoB.getId());
+//            // Calcular la ruta más corta entre puntoA y puntoB
+//            List<MapNode> ruta = grafo.findShortestPath(puntoA.getId(), puntoB.getId());
+//            if (ruta != null && !ruta.isEmpty()) {
+//                dibujarRuta(ruta); // Dibujar la ruta en verde
+//            } else {
+//                System.out.println("No se encontró una ruta entre los nodos seleccionados.");
+//            }
+
+            double[][] shortestPaths = grafo.floydWarshall();
+            int[][] next = grafo.getNextMatrix(); // Assuming you have a method to get the next matrix
+            int startNodeIndex = new ArrayList<>(grafo.getNodes()).indexOf(puntoA);
+            int endNodeIndex = new ArrayList<>(grafo.getNodes()).indexOf(puntoB);
+            List<MapNode> ruta = grafo.getPathFromFloydWarshall(startNodeIndex, endNodeIndex, next);
+
             if (ruta != null && !ruta.isEmpty()) {
                 dibujarRuta(ruta); // Dibujar la ruta en verde
+                System.out.println(Arrays.deepToString(shortestPaths));
             } else {
                 System.out.println("No se encontró una ruta entre los nodos seleccionados.");
             }
@@ -109,7 +121,6 @@ public class MainController extends Controller implements Initializable {
             puntoB = null;
         }
     }
-
 
 
     private MapNode encontrarNodoCercano(double x, double y) {
