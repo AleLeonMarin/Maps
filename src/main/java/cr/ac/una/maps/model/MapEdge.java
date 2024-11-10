@@ -1,5 +1,8 @@
 package cr.ac.una.maps.model;
 
+import lombok.Data;
+
+@Data
 public class MapEdge {
     private MapNode from;
     private MapNode to;
@@ -15,33 +18,10 @@ public class MapEdge {
         this.oneWay = oneWay; // Define si la calle es unidireccional
     }
 
-    public MapNode getFrom() {
-        return from;
-    }
-
-    public MapNode getTo() {
-        return to;
-    }
-
     public double getWeight() {
         return closed ? Double.MAX_VALUE : weight; // Si la calle está cerrada, asignar peso infinito
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
-    public void setClosed(boolean closed) {
-        this.closed = closed;
-    }
-
-    public boolean isClosed() {
-        return closed;
-    }
-
-    public boolean isOneWay() {
-        return oneWay;
-    }
 
     @Override
     public String toString() {

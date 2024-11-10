@@ -1,12 +1,16 @@
 package cr.ac.una.maps.controller;
 
-import com.sun.javafx.geom.Edge;
+import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
+import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
+import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -21,17 +25,28 @@ public class MainController extends Controller implements Initializable {
     private Canvas canvas;
     private Canvas canvasRoutes;
 
-
     @FXML
     private ImageView imvMap;
 
     @FXML
     private StackPane stackpaneMap;
 
+    @FXML
+    private ComboBox<String> cmbAlgoritmos;
+
+    @FXML
+    private Button btnIniciar;
+
+
+    private Map<String, PathfindingAlgorithm> algorithms;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         grafo = new MapGraph();
+        algorithms = new HashMap<>();
+        algorithms.put("Dijkstra", new DijkstraAlgorithm());
+        algorithms.put("Floyd-Warshall", new FloydWarshallAlgorithm());
+        cmbAlgoritmos.getItems().addAll(algorithms.keySet());
 
         // Crear el canvas para dibujar nodos
         canvas = new Canvas();
@@ -74,9 +89,28 @@ public class MainController extends Controller implements Initializable {
         });
     }
 
+    @FXML
+    void onActionBtnIniciar(ActionEvent event) {
+        System.out.println("Iniciando...");
+    }
+
+    @FXML
+    void onActionBtnNuevaRuta(ActionEvent event) {
+        limpiarCanvas();
+        System.out.println("Nueva Ruta");
+    }
+
+    private void limpiarCanvas() {
+        GraphicsContext gcNodos = canvas.getGraphicsContext2D();
+        GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D();
+        gcNodos.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gcRutas.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+        puntoA = null;
+        puntoB = null;
+    }
+
 
     private void manejarClickEnMapa(double x, double y) {
-        // Convertir el clic a una coordenada de nodo
         MapNode nodoClic = encontrarNodoCercano(x, y);
 
         if (nodoClic == null) {
@@ -84,41 +118,33 @@ public class MainController extends Controller implements Initializable {
             return;
         }
 
-        if (puntoA == null) {
-            // Definir el punto A si no ha sido seleccionado
-            puntoA = nodoClic;
-            System.out.println("Punto A seleccionado: " + puntoA);
-            dibujarNodo(puntoA, Color.RED); // Dibuja en rojo el punto A
-        } else if (puntoB == null) {
-            // Definir el punto B si punto A ya está definido
-            puntoB = nodoClic;
-            System.out.println("Punto B seleccionado: " + puntoB);
-            dibujarNodo(puntoB, Color.BLUE); // Dibuja en azul el punto B
+        if (cmbAlgoritmos.getValue() != null) {
+            if (puntoA == null) {
+                limpiarCanvas();
+                puntoA = nodoClic;
+                System.out.println("Punto A seleccionado: " + puntoA);
+                dibujarNodo(puntoA, Color.RED);
+                puntoB = null;
+            } else if (puntoB == null) {
+                puntoB = nodoClic;
+                System.out.println("Punto B seleccionado: " + puntoB);
+                dibujarNodo(puntoB, Color.BLUE);
 
-//            // Calcular la ruta más corta entre puntoA y puntoB
-//            List<MapNode> ruta = grafo.findShortestPath(puntoA.getId(), puntoB.getId());
-//            if (ruta != null && !ruta.isEmpty()) {
-//                dibujarRuta(ruta); // Dibujar la ruta en verde
-//            } else {
-//                System.out.println("No se encontró una ruta entre los nodos seleccionados.");
-//            }
+                String selectedAlgorithm = cmbAlgoritmos.getValue();
+                PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
 
-            double[][] shortestPaths = grafo.floydWarshall();
-            int[][] next = grafo.getNextMatrix(); // Assuming you have a method to get the next matrix
-            int startNodeIndex = new ArrayList<>(grafo.getNodes()).indexOf(puntoA);
-            int endNodeIndex = new ArrayList<>(grafo.getNodes()).indexOf(puntoB);
-            List<MapNode> ruta = grafo.getPathFromFloydWarshall(startNodeIndex, endNodeIndex, next);
-
-            if (ruta != null && !ruta.isEmpty()) {
-                dibujarRuta(ruta); // Dibujar la ruta en verde
-                System.out.println(Arrays.deepToString(shortestPaths));
-            } else {
-                System.out.println("No se encontró una ruta entre los nodos seleccionados.");
+                if (algorithm != null) {
+                    List<MapNode> ruta = algorithm.findPath(grafo, puntoA, puntoB);
+                    if (ruta != null && !ruta.isEmpty()) {
+                        dibujarRuta(ruta);
+                    } else {
+                        System.out.println("No se encontró una ruta entre los nodos seleccionados.");
+                    }
+                } else {
+                    System.out.println("No se seleccionó un algoritmo válido.");
+                }
+                puntoA = null;
             }
-
-            // Restablecer los puntos para una nueva selección si se desea
-            puntoA = null;
-            puntoB = null;
         }
     }
 

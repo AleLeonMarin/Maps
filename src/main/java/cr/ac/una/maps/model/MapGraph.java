@@ -1,7 +1,10 @@
 package cr.ac.una.maps.model;
 
+import lombok.Data;
+
 import java.util.*;
 
+@Data
 public class MapGraph {
     private Map<String, MapNode> nodes; // Mapa de nodos por su ID
     private List<MapEdge> edges; // Lista de todas las aristas
@@ -34,10 +37,6 @@ public class MapGraph {
 
     public List<MapNode> getNodes() {
         return new ArrayList<>(nodes.values());
-    }
-
-    public List<MapEdge> getEdges() {
-        return edges;
     }
 
     public void aplicarTransitoPesadoAleatorio() {

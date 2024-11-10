@@ -77,7 +77,18 @@
         -fx-font-size: 14px;           /* Tamaño de la fuente */
         -fx-pref-width: 100px;         /* Ancho preferido */
     }
-
+    .label-title {
+        -fx-font-size: 24px;          /* Tamaño de fuente grande */
+        -fx-font-weight: bold;        /* Texto en negrita */
+        -fx-text-fill: #ffffff;       /* Color del texto blanco */
+        -fx-background-color: #474747; /* Color de fondo azul */
+        -fx-padding: 10px;            /* Espaciado interno */
+        -fx-border-color: #000000;    /* Color del borde */
+        -fx-border-width: 2px;        /* Ancho del borde */
+        -fx-border-radius: 5px;       /* Bordes redondeados */
+        -fx-background-radius: 5px;   /* Bordes del fondo redondeados */
+        -fx-alignment: center;        /* Alineación del texto al centro */
+    }
 
 
 }
