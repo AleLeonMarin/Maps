@@ -44,15 +44,21 @@ public class MainController extends Controller implements Initializable {
 
     private double x;
     private double y;
+    private boolean selectNode;
+    MapEdge selectedEdge;
+    Set<MapEdge> callesCerradas;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        callesCerradas = new HashSet<>();
+        selectNode = true;
         grafo = new MapGraph();
         algorithms = new HashMap<>();
         algorithms.put("Dijkstra", new DijkstraAlgorithm());
         algorithms.put("Floyd-Warshall", new FloydWarshallAlgorithm());
         cmbAlgoritmos.getItems().addAll(algorithms.keySet());
         btnContinuar.setVisible(false);
+        cmbAlgoritmos.getSelectionModel().selectFirst();
 
         // Crear el canvas para dibujar nodos
         canvas = new Canvas();
@@ -97,29 +103,17 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
-        if (puntoA != null && puntoB != null) {
-            String selectedAlgorithm = cmbAlgoritmos.getValue();
-            PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
-
-            if (algorithm != null) {
-                List<MapNode> ruta = algorithm.findPath(grafo, puntoA, puntoB);
-                if (ruta != null && !ruta.isEmpty()) {
-                    dibujarRuta(ruta);
-                    puntoA = null;
-                    btnContinuar.setVisible(true);
-                } else {
-                    System.out.println("No se encontró una ruta entre los nodos seleccionados.");
-                }
-            } else {
-                System.out.println("No se seleccionó un algoritmo válido.");
-            }
-        }
+        limpiarCanvas();
+        dibujarNodo(puntoA, Color.RED);
+        dibujarNodo(puntoB, Color.BLUE);
+        calcularRuta();
     }
 
     @FXML
     void onActionBtnNuevaRuta(ActionEvent event) {
+        puntoA = null;
+        puntoB = null;
         limpiarCanvas();
-        System.out.println("Nueva Ruta");
     }
 
     @FXML
@@ -133,31 +127,35 @@ public class MainController extends Controller implements Initializable {
     }
 
     private void cerrarCalleSeleccionada() {
-        MapEdge edgeSeleccionada = obtenerCalleSeleccionada();
-        if (edgeSeleccionada != null) {
-            if (edgeSeleccionada.isClosed()) {
-                edgeSeleccionada.setClosed(false);
-                dibujarCalle(edgeSeleccionada, Color.PAPAYAWHIP);
+        if (selectedEdge != null) {
+            if (selectedEdge.isClosed()) {
+                selectedEdge.setClosed(false);
+                callesCerradas.remove(selectedEdge);
+                dibujarCalle(selectedEdge, Color.PAPAYAWHIP);
             } else {
-                edgeSeleccionada.setClosed(true);
-                dibujarCalle(edgeSeleccionada, Color.RED);
+                callesCerradas.add(selectedEdge);
+                selectedEdge.setClosed(true);
+                dibujarCalle(selectedEdge, Color.RED);
             }
         }
     }
 
-    private MapEdge obtenerCalleSeleccionada() {
-        double minDistance = Double.MAX_VALUE;
-        MapEdge selectedEdge = null;
-
-        for (MapEdge edge : grafo.getEdges()) {
-            double distance = distanceToEdge(x, y, edge);
-            if (distance < minDistance) {
-                minDistance = distance;
-                selectedEdge = edge;
+    private void seleccionarCalle() {
+        if (!selectNode) {
+            double minDistance = Double.MAX_VALUE;
+            if (selectedEdge != null) {
+                dibujarCalle(selectedEdge, Color.web("0xffff00ff"));//despintar la calle seleccionada
             }
+            selectedEdge = null;
+            for (MapEdge edge : grafo.getEdges()) {
+                double distance = distanceToEdge(x, y, edge);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    selectedEdge = edge;
+                }
+            }
+            dibujarCalle(selectedEdge, Color.BLUE);
         }
-
-        return selectedEdge;
     }
 
     private double distanceToEdge(double x, double y, MapEdge edge) {
@@ -202,15 +200,24 @@ public class MainController extends Controller implements Initializable {
 
     private void limpiarCanvas() {
         btnContinuar.setVisible(false);
+        selectNode = true;
+        selectedEdge = null;
         GraphicsContext gcNodos = canvas.getGraphicsContext2D();
         GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D();
         gcNodos.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gcRutas.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-        puntoA = null;
-        puntoB = null;
+        pintarCallesCerradas();
     }
 
     private void manejarClickEnMapa(double x, double y) {
+        if (selectNode) {
+            seleccionarNodo(x, y);
+        } else {
+            seleccionarCalle();
+        }
+    }
+
+    private void seleccionarNodo(double x, double y) {
         MapNode nodoClic = encontrarNodoCercano(x, y);
 
         if (nodoClic == null) {
@@ -221,16 +228,43 @@ public class MainController extends Controller implements Initializable {
         if (cmbAlgoritmos.getValue() != null) {
             if (puntoA == null) {
                 btnContinuar.setVisible(false);
-                limpiarCanvas();
                 puntoA = nodoClic;
                 dibujarNodo(puntoA, Color.RED);
                 puntoB = null;
             } else if (puntoB == null && nodoClic != puntoA) {
                 puntoB = nodoClic;
                 dibujarNodo(puntoB, Color.BLUE);
+                calcularRuta();
             }
         }
     }
+
+    private void calcularRuta(){
+        if (puntoB != null) {
+            String selectedAlgorithm = cmbAlgoritmos.getValue();
+            PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
+
+            if (algorithm != null) {
+                List<MapNode> ruta = algorithm.findPath(grafo, puntoA, puntoB);
+                if (ruta != null && !ruta.isEmpty()) {
+                    dibujarRuta(ruta);
+                    btnContinuar.setVisible(true);
+                    selectNode = false;
+                } else {
+                    System.out.println("No se encontró una ruta entre los nodos seleccionados.");
+                }
+            } else {
+                System.out.println("No se seleccionó un algoritmo válido.");
+            }
+        }
+    }
+
+    private  void pintarCallesCerradas(){
+        for (MapEdge edge : callesCerradas) {
+            dibujarCalle(edge, Color.RED);
+        }
+    }
+
 
     private MapNode encontrarNodoCercano(double x, double y) {
         // Buscar el nodo más cercano basado en las coordenadas
@@ -257,7 +291,7 @@ public class MainController extends Controller implements Initializable {
     private void dibujarRuta(List<MapNode> ruta) {
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D(); // Usar el canvas de rutas
         gc.setStroke(Color.GREEN);
-        gc.setLineWidth(2);
+        gc.setLineWidth(3);
 
         if (ruta.isEmpty()) {
             System.out.println("No se encontró una ruta entre los puntos A y B.");
@@ -416,7 +450,6 @@ public class MainController extends Controller implements Initializable {
             processedEdges.add(selectedEdge);
         }
 
-        // Dibujar las aristas con tráfico pesado en amarillo
         for (MapEdge edge : processedEdges) {
             dibujarArista(edge, Color.YELLOW); // Asegurar que las aristas con tráfico se dibujen en amarillo
         }
