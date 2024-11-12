@@ -1,8 +1,11 @@
 package cr.ac.una.maps.model;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class MapNode {
     private String id; // Un identificador único para el nodo
     private double x, y; // Coordenadas del nodo en el mapa
@@ -15,27 +18,10 @@ public class MapNode {
         this.edges = new ArrayList<>();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public List<MapEdge> getEdges() {
-        return edges;
-    }
-
     public void addEdge(MapEdge edge) {
         this.edges.add(edge);
     }
 
-    // Método para calcular la distancia desde este nodo a otro nodo
     public double distanceTo(MapNode other) {
         return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
     }
