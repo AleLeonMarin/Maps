@@ -100,6 +100,7 @@ public class MapGraph {
         next = new int[cantidadNodos][cantidadNodos]; // Matriz de predecesores
         MapNode[] nodeArray = nodes.values().toArray(new MapNode[0]);
 
+        // Inicializar distancias y predecesores
         for (int i = 0; i < cantidadNodos; i++) {
             for (int j = 0; j < cantidadNodos; j++) {
                 if (i == j) {
@@ -111,24 +112,35 @@ public class MapGraph {
             }
         }
 
+        // Establecer distancias iniciales respetando aristas unidireccionales y cerradas
         for (MapEdge edge : edges) {
-            int fromIndex = Arrays.asList(nodeArray).indexOf(edge.getFrom());
-            int toIndex = Arrays.asList(nodeArray).indexOf(edge.getTo());
-            distance[fromIndex][toIndex] = edge.getWeight();
-            next[fromIndex][toIndex] = toIndex;
-            if (!edge.isOneWay()) {
-                distance[toIndex][fromIndex] = edge.getWeight();
-                next[toIndex][fromIndex] = fromIndex;
+            if (!edge.isClosed()) { // Ignorar aristas cerradas
+                int fromIndex = Arrays.asList(nodeArray).indexOf(edge.getFrom());
+                int toIndex = Arrays.asList(nodeArray).indexOf(edge.getTo());
+
+                // Configurar la distancia de `from` a `to`
+                distance[fromIndex][toIndex] = edge.getWeight();
+                next[fromIndex][toIndex] = toIndex;
+
+                // Solo configurar la distancia de regreso `to` a `from` si la arista no es unidireccional
+                if (edge.isOneWay()) {
+                    distance[toIndex][fromIndex] = edge.getWeight();
+                    next[toIndex][fromIndex] = fromIndex;
+                }
             }
         }
 
+        // Algoritmo de Floyd-Warshall con manejo de predecesores
         for (int k = 0; k < cantidadNodos; k++) {
             for (int i = 0; i < cantidadNodos; i++) {
                 for (int j = 0; j < cantidadNodos; j++) {
-                    if (distance[i][k] != Double.MAX_VALUE && distance[k][j] != Double.MAX_VALUE &&
-                            distance[i][k] + distance[k][j] < distance[i][j]) {
-                        distance[i][j] = distance[i][k] + distance[k][j];
-                        next[i][j] = next[i][k]; // Actualizamos el predecesor
+                    // Verificar que i -> k y k -> j tengan caminos válidos antes de actualizar
+                    if (distance[i][k] != Double.MAX_VALUE && distance[k][j] != Double.MAX_VALUE) {
+                        double newDist = distance[i][k] + distance[k][j];
+                        if (newDist < distance[i][j]) {
+                            distance[i][j] = newDist;
+                            next[i][j] = next[i][k]; // Actualizar el predecesor
+                        }
                     }
                 }
             }
@@ -136,6 +148,7 @@ public class MapGraph {
 
         return distance;
     }
+
 
     public int[][] getNextMatrix() {
         return next;
@@ -152,4 +165,5 @@ public class MapGraph {
         }
         return path;
     }
+
 }

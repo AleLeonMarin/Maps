@@ -428,7 +428,6 @@ public class MainController extends Controller implements Initializable {
     }
 
 
-
     private void dibujarNodo(MapNode nodo, Color color) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFill(color);
@@ -508,7 +507,6 @@ public class MainController extends Controller implements Initializable {
         grafo.addNode("8", 352, 36);
 
 
-
         grafo.addNode("9", 390, 40);
         grafo.addNode("10", 406, 49);
         grafo.addNode("11", 482, 16);
@@ -537,7 +535,6 @@ public class MainController extends Controller implements Initializable {
         grafo.addNode("30", 273, 490);
         grafo.addNode("31", 388, 594);
         grafo.addNode("32", 133, 499);
-
 
 
         // Lista para almacenar las aristas que serán seleccionadas aleatoriamente
@@ -577,7 +574,7 @@ public class MainController extends Controller implements Initializable {
         edges.add(grafo.addEdge("M", "NC1", calcularDistancia(596, 458, 507, 423), false));
         edges.add(grafo.addEdge("N", "M", calcularDistancia(623, 390, 596, 458), false));
         edges.add(grafo.addEdge("O", "N", calcularDistancia(649, 319, 623, 390), false));
-        //falta O - P
+        edges.add(grafo.addEdge("O", "P", calcularDistancia(649, 319, 578, 293), false));
         edges.add(grafo.addEdge("P", "S", calcularDistancia(578, 293, 607, 223), false));
         edges.add(grafo.addEdge("P", "I", calcularDistancia(578, 293, 507, 261), false));
         edges.add(grafo.addEdge("Q", "P", calcularDistancia(555, 360, 578, 293), false));
@@ -623,7 +620,6 @@ public class MainController extends Controller implements Initializable {
         grafo.addEdge("NC6", "NC5", calcularDistancia(487, 417, 516, 347), false);
         grafo.addEdge("NC6", "G", calcularDistancia(487, 417, 459, 400), false);
         grafo.addEdge("NC6", "NC1", calcularDistancia(487, 417, 507, 423), false);
-
 
 
         edges.add(grafo.addEdge("0", "28", calcularDistancia(37, 495, 423, 705), false));
@@ -712,7 +708,6 @@ public class MainController extends Controller implements Initializable {
 
         edges.add(grafo.addEdge("U", "32", calcularDistancia(297, 576, 133, 499), false));
         edges.add(grafo.addEdge("32", "U", calcularDistancia(133, 499, 297, 576), false));
-
 
 
         Random rand = new Random();
