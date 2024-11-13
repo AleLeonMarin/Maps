@@ -30,6 +30,13 @@ public class MainController extends Controller implements Initializable {
     private Canvas canvas;
     private Canvas canvasRoutes;
 
+    private double currentX;
+    private double currentY;
+    private int currentSegment = 0;
+
+    @FXML
+    private Button btnPauseResume;
+
     @FXML
     private ImageView imvMap;
 
@@ -52,6 +59,9 @@ public class MainController extends Controller implements Initializable {
     private boolean selectNode;
     MapEdge selectedEdge;
     Set<MapEdge> callesCerradas;
+
+    private Timeline timeline;
+    private boolean isPaused = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -111,13 +121,27 @@ public class MainController extends Controller implements Initializable {
             guardarCoordenadasDeClick(x, y);
             manejarClickEnMapa(x, y);
         });
+
+        btnPauseResume.setText("Pausar");
+
+        btnPauseResume.setOnAction(event -> {
+            togglePauseResume();
+        });
     }
 
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
         limpiarCanvas();
+
+        // Detener cualquier animación previa antes de iniciar una nueva
+        if (timeline != null) {
+            timeline.stop();
+            timeline = null;
+            isPaused = false; // Resetear el estado de pausa
+            btnPauseResume.setText("Pausar");
+        }
+
         if (puntoA != null && puntoB != null) {
-            // Calculamos la ruta utilizando el algoritmo seleccionado
             String selectedAlgorithm = cmbAlgoritmos.getValue();
             PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
 
@@ -143,6 +167,14 @@ public class MainController extends Controller implements Initializable {
         puntoA = null;
         puntoB = null;
         limpiarCanvas();
+
+
+        if (timeline != null) {
+            timeline.stop();
+            timeline = null;
+            isPaused = false;
+            btnPauseResume.setText("Pausar");
+        }
     }
 
     @FXML
@@ -318,83 +350,83 @@ public class MainController extends Controller implements Initializable {
 
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         Image car = new Image("cr/ac/una/maps/resources/car.png");
-        double imageWidth = 30; // Ajuste del ancho del coche
-        double imageHeight = 50; // Ajuste del alto del coche
+        double imageWidth = 30;
+        double imageHeight = 50;
 
-        // Dibujar la ruta completa una sola vez
         dibujarRuta(ruta);
 
-        // Variables para controlar el estado de la animación
-        final int[] currentSegment = {0}; // Segmento actual de la ruta
+        final int[] currentSegment = {0};
         final double[] currentX = {ruta.get(0).getX()};
         final double[] currentY = {ruta.get(0).getY()};
         final double[] targetX = {ruta.get(1).getX()};
         final double[] targetY = {ruta.get(1).getY()};
 
-        // Calcular el vector de dirección normalizado y la velocidad del movimiento
-        final double velocidad = 1.0; // Ajuste de la velocidad del coche (mayor valor = más rápido)
+        final double velocidad = 1.0;
         final double[] deltaX = {targetX[0] - currentX[0]};
         final double[] deltaY = {targetY[0] - currentY[0]};
         final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
         final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
         final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
 
-        // Crear la animación usando Timeline de JavaFX
-        Timeline timeline = new Timeline();
+        timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
-            // Actualizar la posición actual
-            currentX[0] += dirX[0];
-            currentY[0] += dirY[0];
+            if (!isPaused) { // Solo actualizar si no está en pausa
+                currentX[0] += dirX[0];
+                currentY[0] += dirY[0];
 
-            // Verificar si hemos alcanzado el destino
-            if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
-                // Ajustar la posición final al nodo objetivo
-                currentX[0] = targetX[0];
-                currentY[0] = targetY[0];
+                if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
+                    currentX[0] = targetX[0];
+                    currentY[0] = targetY[0];
 
-                // Mover al siguiente segmento si no hemos terminado la ruta
-                if (currentSegment[0] < ruta.size() - 2) {
-                    currentSegment[0]++;
-                    MapNode inicio = ruta.get(currentSegment[0]);
-                    MapNode fin = ruta.get(currentSegment[0] + 1);
-                    targetX[0] = fin.getX();
-                    targetY[0] = fin.getY();
+                    if (currentSegment[0] < ruta.size() - 2) {
+                        currentSegment[0]++;
+                        MapNode inicio = ruta.get(currentSegment[0]);
+                        MapNode fin = ruta.get(currentSegment[0] + 1);
+                        targetX[0] = fin.getX();
+                        targetY[0] = fin.getY();
 
-                    // Calcular el nuevo vector de dirección
-                    deltaX[0] = targetX[0] - inicio.getX();
-                    deltaY[0] = targetY[0] - inicio.getY();
-                    distancia[0] = Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0]);
-                    dirX[0] = (deltaX[0] / distancia[0]) * velocidad;
-                    dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
-                } else {
-                    // Si llegamos al final de la ruta, detener la animación
-                    timeline.stop();
+                        deltaX[0] = targetX[0] - inicio.getX();
+                        deltaY[0] = targetY[0] - inicio.getY();
+                        distancia[0] = Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0]);
+                        dirX[0] = (deltaX[0] / distancia[0]) * velocidad;
+                        dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
+                    } else {
+                        timeline.stop();
+                    }
                 }
+
+                gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+                pintarCallesCerradas();
+                dibujarRuta(ruta);
+
+                double angle = Math.atan2(dirY[0], dirX[0]);
+                double angleDegrees = Math.toDegrees(angle);
+                double imageOrientationOffset = -90;
+                double finalAngleDegrees = angleDegrees + imageOrientationOffset;
+
+                gc.save();
+                gc.translate(currentX[0], currentY[0]);
+                gc.rotate(finalAngleDegrees);
+                gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
+                gc.restore();
             }
-
-            // Limpiar solo la parte necesaria sin borrar la ruta
-            gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-
-            // Redibujar la ruta y calles cerradas
-            pintarCallesCerradas();
-            dibujarRuta(ruta);
-
-            // Dibujar la imagen del coche en la posición actual
-            double angle = Math.atan2(dirY[0], dirX[0]); // Ángulo en radianes
-            double angleDegrees = Math.toDegrees(angle); // Convertir el ángulo a grados
-            double imageOrientationOffset = -90; // Supongamos que la imagen apunta hacia arriba originalmente
-            double finalAngleDegrees = angleDegrees + imageOrientationOffset;
-
-            gc.save();
-            gc.translate(currentX[0], currentY[0]); // Trasladar al punto actual
-            gc.rotate(finalAngleDegrees); // Aplicar la rotación
-            gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
-            gc.restore();
         }));
 
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
+
+    private void togglePauseResume() {
+        if (isPaused) {
+            timeline.play();
+            btnPauseResume.setText("Pausar");
+        } else {
+            timeline.pause();
+            btnPauseResume.setText("Reanudar");
+        }
+        isPaused = !isPaused;
+    }
+
 
 
     private void dibujarNodo(MapNode nodo, Color color) {
