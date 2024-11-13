@@ -4,6 +4,9 @@ import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,9 +14,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.*;
@@ -62,11 +67,11 @@ public class MainController extends Controller implements Initializable {
 
         // Crear el canvas para dibujar nodos
         canvas = new Canvas();
-        stackpaneMap.getChildren().add(canvas);  // Añadir el canvas al StackPane
+        stackpaneMap.getChildren().add(canvas); // Añadir el canvas al StackPane
 
         // Crear un segundo canvas para dibujar rutas/aristas
         canvasRoutes = new Canvas();
-        stackpaneMap.getChildren().add(canvasRoutes);  // Añadir el canvasRoutes al StackPane
+        stackpaneMap.getChildren().add(canvasRoutes); // Añadir el canvasRoutes al StackPane
 
         // Asegurar que ambos canvas cubran todo el stackpane cuando cambie el tamaño
         stackpaneMap.widthProperty().addListener((obs, oldVal, newVal) -> {
@@ -89,7 +94,7 @@ public class MainController extends Controller implements Initializable {
         // Esperar a que el StackPane tenga un tamaño definitivo antes de dibujar las aristas
         stackpaneMap.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
             if (newBounds.getWidth() > 0 && newBounds.getHeight() > 0) {
-                inicializarGrafo();  // Inicializar nodos y aristas
+                inicializarGrafo(); // Inicializar nodos y aristas
             }
         });
 
@@ -104,7 +109,24 @@ public class MainController extends Controller implements Initializable {
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
         limpiarCanvas();
-        dibujarNodo(puntoA, Color.RED);
+        if (puntoA != null && puntoB != null) {
+            // Calculamos la ruta utilizando el algoritmo seleccionado
+            String selectedAlgorithm = cmbAlgoritmos.getValue();
+            PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
+
+            if (algorithm != null) {
+                List<MapNode> ruta = algorithm.findPath(grafo, puntoA, puntoB);
+                if (ruta != null && !ruta.isEmpty()) {
+                    animarRecorridoConCoche(ruta);
+                } else {
+                    System.out.println("No se encontró una ruta entre los nodos seleccionados.");
+                }
+            } else {
+                System.out.println("No se seleccionó un algoritmo válido.");
+            }
+        } else {
+            System.out.println("Debe seleccionar los puntos de inicio y destino antes de iniciar.");
+        }
         dibujarNodo(puntoB, Color.BLUE);
         calcularRuta();
     }
@@ -144,7 +166,7 @@ public class MainController extends Controller implements Initializable {
         if (!selectNode) {
             double minDistance = Double.MAX_VALUE;
             if (selectedEdge != null) {
-                dibujarCalle(selectedEdge, Color.web("0xffff00ff"));//despintar la calle seleccionada
+                dibujarCalle(selectedEdge, Color.web("0xffff00ff"));// despintar la calle seleccionada
             }
             selectedEdge = null;
             for (MapEdge edge : grafo.getEdges()) {
@@ -239,7 +261,7 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
-    private void calcularRuta(){
+    private void calcularRuta() {
         if (puntoB != null) {
             String selectedAlgorithm = cmbAlgoritmos.getValue();
             PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
@@ -259,12 +281,11 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
-    private  void pintarCallesCerradas(){
+    private void pintarCallesCerradas() {
         for (MapEdge edge : callesCerradas) {
             dibujarCalle(edge, Color.RED);
         }
     }
-
 
     private MapNode encontrarNodoCercano(double x, double y) {
         // Buscar el nodo más cercano basado en las coordenadas
@@ -281,6 +302,93 @@ public class MainController extends Controller implements Initializable {
 
         return nodoCercano;
     }
+
+    private void animarRecorridoConCoche(List<MapNode> ruta) {
+        if (ruta == null || ruta.size() < 2) {
+            System.out.println("No hay ruta válida para animar.");
+            return;
+        }
+
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+        Image car = new Image("cr/ac/una/maps/resources/car.png");
+        double imageWidth = 30; // Ajuste del ancho del coche
+        double imageHeight = 50; // Ajuste del alto del coche
+
+        // Dibujar la ruta completa una sola vez
+        dibujarRuta(ruta);
+
+        // Variables para controlar el estado de la animación
+        final int[] currentSegment = {0}; // Segmento actual de la ruta
+        final double[] currentX = {ruta.get(0).getX()};
+        final double[] currentY = {ruta.get(0).getY()};
+        final double[] targetX = {ruta.get(1).getX()};
+        final double[] targetY = {ruta.get(1).getY()};
+
+        // Calcular el vector de dirección normalizado y la velocidad del movimiento
+        final double velocidad = 1.5; // Ajuste de la velocidad del coche (mayor valor = más rápido)
+        final double[] deltaX = {targetX[0] - currentX[0]};
+        final double[] deltaY = {targetY[0] - currentY[0]};
+        final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
+        final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
+        final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
+
+        // Crear la animación usando Timeline de JavaFX
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
+            // Actualizar la posición actual
+            currentX[0] += dirX[0];
+            currentY[0] += dirY[0];
+
+            // Verificar si hemos alcanzado el destino
+            if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
+                // Ajustar la posición final al nodo objetivo
+                currentX[0] = targetX[0];
+                currentY[0] = targetY[0];
+
+                // Mover al siguiente segmento si no hemos terminado la ruta
+                if (currentSegment[0] < ruta.size() - 2) {
+                    currentSegment[0]++;
+                    MapNode inicio = ruta.get(currentSegment[0]);
+                    MapNode fin = ruta.get(currentSegment[0] + 1);
+                    targetX[0] = fin.getX();
+                    targetY[0] = fin.getY();
+
+                    // Calcular el nuevo vector de dirección
+                    deltaX[0] = targetX[0] - inicio.getX();
+                    deltaY[0] = targetY[0] - inicio.getY();
+                    distancia[0] = Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0]);
+                    dirX[0] = (deltaX[0] / distancia[0]) * velocidad;
+                    dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
+                } else {
+                    // Si llegamos al final de la ruta, detener la animación
+                    timeline.stop();
+                }
+            }
+
+            // Limpiar solo la parte necesaria sin borrar la ruta
+            gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+
+            // Redibujar la ruta y calles cerradas
+            pintarCallesCerradas();
+            dibujarRuta(ruta);
+
+            // Dibujar la imagen del coche en la posición actual
+            double angle = Math.atan2(dirY[0], dirX[0]); // Ángulo en radianes
+            double angleDegrees = Math.toDegrees(angle); // Convertir el ángulo a grados
+            double imageOrientationOffset = -90; // Supongamos que la imagen apunta hacia arriba originalmente
+            double finalAngleDegrees = angleDegrees + imageOrientationOffset;
+
+            gc.save();
+            gc.translate(currentX[0], currentY[0]); // Trasladar al punto actual
+            gc.rotate(finalAngleDegrees); // Aplicar la rotación
+            gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
+            gc.restore();
+        }));
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+
 
     private void dibujarNodo(MapNode nodo, Color color) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -406,16 +514,15 @@ public class MainController extends Controller implements Initializable {
         edges.add(grafo.addEdge("AA", "O", calcularDistancia(675, 248, 649, 319), false));
         edges.add(grafo.addEdge("BB", "O", calcularDistancia(716, 347, 649, 319), false));
 
-
         grafo.addEdge("NC1", "NC6", calcularDistancia(507, 423, 487, 417), false);
         grafo.addEdge("NC1", "M", calcularDistancia(507, 423, 596, 458), false);
-        //grafo.addEdge("NC1", "R", calcularDistancia(507, 423, 484, 505), false);
+        // grafo.addEdge("NC1", "R", calcularDistancia(507, 423, 484, 505), false);
 
         grafo.addEdge("NC2", "D", calcularDistancia(462, 247, 439, 241), false);
-        //grafo.addEdge("NC2", "I", calcularDistancia(462, 247, 507, 261), false);
+        // grafo.addEdge("NC2", "I", calcularDistancia(462, 247, 507, 261), false);
         grafo.addEdge("NC2", "NC3", calcularDistancia(462, 247, 486, 176), false);
 
-        //grafo.addEdge("NC3", "Y", calcularDistancia(486, 176, 440, 157), false);
+        // grafo.addEdge("NC3", "Y", calcularDistancia(486, 176, 440, 157), false);
         grafo.addEdge("NC3", "NC2", calcularDistancia(486, 176, 462, 247), false);
         grafo.addEdge("NC3", "T", calcularDistancia(486, 176, 530, 191), false);
 
@@ -423,8 +530,8 @@ public class MainController extends Controller implements Initializable {
         grafo.addEdge("NC4", "L", calcularDistancia(331, 350, 297, 434), false);
         grafo.addEdge("NC4", "F", calcularDistancia(331, 350, 388, 373), false);
 
-        //grafo.addEdge("NC5", "H", calcularDistancia(516, 347, 483, 330), false);
-        //grafo.addEdge("NC5", "NC6", calcularDistancia(516, 347, 487, 417), false);
+        // grafo.addEdge("NC5", "H", calcularDistancia(516, 347, 483, 330), false);
+        // grafo.addEdge("NC5", "NC6", calcularDistancia(516, 347, 487, 417), false);
         grafo.addEdge("NC5", "Q", calcularDistancia(516, 347, 555, 360), false);
 
         grafo.addEdge("NC6", "NC5", calcularDistancia(487, 417, 516, 347), false);
@@ -478,7 +585,8 @@ public class MainController extends Controller implements Initializable {
             double x2 = edge.getTo().getX();
             double y2 = edge.getTo().getY();
 
-            System.out.println("Dibujando arista desde " + edge.getFrom().getId() + " hasta " + edge.getTo().getId() + " en color " + color.toString());
+            System.out.println("Dibujando arista desde " + edge.getFrom().getId() + " hasta " + edge.getTo().getId()
+                    + " en color " + color.toString());
             gc.strokeLine(x1, y1, x2, y2); // Dibuja la línea entre los nodos
         } else {
             System.err.println("Canvas no ha sido inicializado. No se puede dibujar.");
