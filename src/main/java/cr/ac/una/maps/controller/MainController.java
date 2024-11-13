@@ -4,10 +4,10 @@ import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
+import cr.ac.una.maps.util.AnimationManager;
 import cr.ac.una.maps.util.Mensaje;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -58,7 +58,7 @@ public class MainController extends Controller implements Initializable {
 
     private double x;
     private double y;
-    private boolean selectNode;
+    private boolean isSelectingNode;
     MapEdge selectedEdge;
     Set<MapEdge> callesCerradas;
 
@@ -68,7 +68,7 @@ public class MainController extends Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         callesCerradas = new HashSet<>();
-        selectNode = true;
+        isSelectingNode = true;
         grafo = new MapGraph();
         algorithms = new HashMap<>();
         algorithms.put("Dijkstra", new DijkstraAlgorithm());
@@ -209,23 +209,60 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
-    private void seleccionarCalle() {
-        if (!selectNode) {
-            double minDistance = Double.MAX_VALUE;
+    private void seleccionarCalle(double x, double y) {
+        if (!isSelectingNode) {
             if (selectedEdge != null) {
-                dibujarCalle(selectedEdge, Color.web("0xffff00ff"));// despintar la calle seleccionada
+                dibujarCalle(selectedEdge, Color.FLORALWHITE);
             }
-            selectedEdge = null;
+            List<MapEdge> nearbyEdges = new ArrayList<>();
             for (MapEdge edge : grafo.getEdges()) {
-                double distance = distanceToEdge(x, y, edge);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    selectedEdge = edge;
+                if (distanceToEdge(x, y, edge) < 5.0) {
+                    nearbyEdges.add(edge);
                 }
             }
-            dibujarCalle(selectedEdge, Color.BLUE);
+
+            if (!nearbyEdges.isEmpty()) {
+                if (selectedEdge != null && nearbyEdges.contains(selectedEdge)) {
+                    int currentIndex = nearbyEdges.indexOf(selectedEdge);
+                    selectedEdge = nearbyEdges.get((currentIndex + 1) % nearbyEdges.size());
+                } else {
+                    selectedEdge = nearbyEdges.get(0);
+                }
+                System.out.println("Arista seleccionada: " + selectedEdge);
+                dibujarCalle(selectedEdge, Color.AQUAMARINE);
+                animarFlecha(selectedEdge);
+            }
         }
     }
+
+
+    private void animarFlecha(MapEdge edge) {
+        String path = edge.isClosed() ? "cr/ac/una/maps/resources/redArrow.png" : "cr/ac/una/maps/resources/greenArrow.png";
+        Image arrowImage = new Image(path);
+
+        double x1 = edge.getFrom().getX();
+        double y1 = edge.getFrom().getY();
+        double x2 = edge.getTo().getX();
+        double y2 = edge.getTo().getY();
+
+        double angle = Math.atan2(y2 - y1, x2 - x1);
+        double angleDegrees = Math.toDegrees(angle);
+        ImageView arrowImageView = new ImageView(arrowImage);
+        arrowImageView.setFitWidth(20);
+        arrowImageView.setFitHeight(20);
+        stackpaneMap.getChildren().add(arrowImageView);
+        arrowImageView.setRotate(angleDegrees);
+        arrowImageView.setX(edge.getTo().getX());
+        arrowImageView.setY(edge.getTo().getY());
+        arrowImageView.setVisible(true);
+
+        AnimationManager.getInstance().animateArrowFadeIn(arrowImageView, 1.0); // Duration of 1 second
+
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.0), e -> stackpaneMap.getChildren().remove(arrowImageView)));
+        timeline.setCycleCount(1);
+        timeline.play();
+    }
+
 
     private double distanceToEdge(double x, double y, MapEdge edge) {
         double x1 = edge.getFrom().getX();
@@ -269,7 +306,7 @@ public class MainController extends Controller implements Initializable {
 
     private void limpiarCanvas() {
         btnContinuar.setVisible(false);
-        selectNode = true;
+        isSelectingNode = true;
         selectedEdge = null;
         GraphicsContext gcNodos = canvas.getGraphicsContext2D();
         GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D();
@@ -279,10 +316,10 @@ public class MainController extends Controller implements Initializable {
     }
 
     private void manejarClickEnMapa(double x, double y) {
-        if (selectNode) {
+        if (isSelectingNode) {
             seleccionarNodo(x, y);
         } else {
-            seleccionarCalle();
+            seleccionarCalle(x,y);
         }
     }
 
@@ -318,7 +355,7 @@ public class MainController extends Controller implements Initializable {
                 if (ruta != null && !ruta.isEmpty()) {
                     dibujarRuta(ruta);
                     btnContinuar.setVisible(true);
-                    selectNode = false;
+                    isSelectingNode = false;
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
                 }

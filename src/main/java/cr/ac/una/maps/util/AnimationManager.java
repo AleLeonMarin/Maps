@@ -233,6 +233,15 @@ public class AnimationManager {
         fadeTransition.play();
     }
 
+    public void animateArrowFadeIn(ImageView arrowImageView, double durationSeconds) {
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(durationSeconds), arrowImageView);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.setCycleCount(1);
+        fadeIn.setAutoReverse(false);
+        fadeIn.play();
+    }
+
 
 
     public void playBrickRemovalAnimation(ImageView imageView) {
