@@ -4,6 +4,7 @@ import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
+import cr.ac.una.maps.util.Mensaje;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -12,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
@@ -131,6 +133,10 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
+        if (puntoA == null || puntoB == null) {
+            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debe seleccionar los puntos de inicio y destino antes de iniciar.");
+            return;
+        }
         limpiarCanvas();
 
         // Detener cualquier animación previa antes de iniciar una nueva
@@ -158,6 +164,7 @@ public class MainController extends Controller implements Initializable {
         } else {
             System.out.println("Debe seleccionar los puntos de inicio y destino antes de iniciar.");
         }
+        dibujarNodo(puntoA, Color.RED);
         dibujarNodo(puntoB, Color.BLUE);
         calcularRuta();
     }
@@ -179,7 +186,8 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     void onAcionContinuar(ActionEvent event) {
-        System.out.println("Continuar");
+
+        new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Sin implemantar");
     }
 
     @FXML
