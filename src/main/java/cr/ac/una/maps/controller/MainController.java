@@ -104,6 +104,13 @@ public class MainController extends Controller implements Initializable {
             y = event.getY();
             manejarClickEnMapa(x, y);
         });
+
+        stackpaneMap.setOnMouseClicked(event -> {
+            x = event.getX();
+            y = event.getY();
+            guardarCoordenadasDeClick(x, y);
+            manejarClickEnMapa(x, y);
+        });
     }
 
     @FXML
@@ -448,6 +455,7 @@ public class MainController extends Controller implements Initializable {
         grafo.addNode("AA", 675, 248);
         grafo.addNode("BB", 716, 347);
 
+
         // Nuevos nodos agregados
         grafo.addNode("NC1", 507, 423);
         grafo.addNode("NC2", 462, 247);
@@ -455,6 +463,50 @@ public class MainController extends Controller implements Initializable {
         grafo.addNode("NC4", 331, 350);
         grafo.addNode("NC5", 516, 347);
         grafo.addNode("NC6", 487, 417);
+
+
+        grafo.addNode("0", 37, 495);
+        grafo.addNode("1", 127, 399);
+        grafo.addNode("2", 179, 346);
+        grafo.addNode("3", 219, 298);
+        grafo.addNode("4", 269, 244);
+        grafo.addNode("5", 295, 212);
+        grafo.addNode("6", 325, 174);
+        grafo.addNode("7", 330, 148);
+        grafo.addNode("8", 352, 36);
+
+
+
+        grafo.addNode("9", 390, 40);
+        grafo.addNode("10", 406, 49);
+        grafo.addNode("11", 482, 16);
+        grafo.addNode("12", 487, 34);
+        grafo.addNode("13", 481, 92);
+        grafo.addNode("14", 555, 122);
+        grafo.addNode("15", 582, 47);
+        grafo.addNode("16", 593, 42);
+        grafo.addNode("17", 648, 133);
+
+
+        grafo.addNode("18", 690, 201);
+        grafo.addNode("19", 787, 373);
+        grafo.addNode("20", 755, 446);
+        grafo.addNode("21", 689, 418);
+        grafo.addNode("22", 660, 486);
+        grafo.addNode("23", 630, 555);
+        grafo.addNode("24", 565, 530);
+
+        grafo.addNode("25", 538, 599);
+        grafo.addNode("26", 463, 576);
+        grafo.addNode("27", 444, 637);
+        grafo.addNode("28", 423, 705);
+
+        grafo.addNode("29", 208, 475);
+        grafo.addNode("30", 273, 490);
+        grafo.addNode("31", 388, 594);
+        grafo.addNode("32", 133, 499);
+
+
 
         // Lista para almacenar las aristas que serán seleccionadas aleatoriamente
 
@@ -493,6 +545,7 @@ public class MainController extends Controller implements Initializable {
         edges.add(grafo.addEdge("M", "NC1", calcularDistancia(596, 458, 507, 423), false));
         edges.add(grafo.addEdge("N", "M", calcularDistancia(623, 390, 596, 458), false));
         edges.add(grafo.addEdge("O", "N", calcularDistancia(649, 319, 623, 390), false));
+        //falta O - P
         edges.add(grafo.addEdge("P", "S", calcularDistancia(578, 293, 607, 223), false));
         edges.add(grafo.addEdge("P", "I", calcularDistancia(578, 293, 507, 261), false));
         edges.add(grafo.addEdge("Q", "P", calcularDistancia(555, 360, 578, 293), false));
@@ -514,15 +567,16 @@ public class MainController extends Controller implements Initializable {
         edges.add(grafo.addEdge("AA", "O", calcularDistancia(675, 248, 649, 319), false));
         edges.add(grafo.addEdge("BB", "O", calcularDistancia(716, 347, 649, 319), false));
 
+
         grafo.addEdge("NC1", "NC6", calcularDistancia(507, 423, 487, 417), false);
         grafo.addEdge("NC1", "M", calcularDistancia(507, 423, 596, 458), false);
-        // grafo.addEdge("NC1", "R", calcularDistancia(507, 423, 484, 505), false);
+        //grafo.addEdge("NC1", "R", calcularDistancia(507, 423, 484, 505), false);
 
         grafo.addEdge("NC2", "D", calcularDistancia(462, 247, 439, 241), false);
-        // grafo.addEdge("NC2", "I", calcularDistancia(462, 247, 507, 261), false);
+        //grafo.addEdge("NC2", "I", calcularDistancia(462, 247, 507, 261), false);
         grafo.addEdge("NC2", "NC3", calcularDistancia(462, 247, 486, 176), false);
 
-        // grafo.addEdge("NC3", "Y", calcularDistancia(486, 176, 440, 157), false);
+        //grafo.addEdge("NC3", "Y", calcularDistancia(486, 176, 440, 157), false);
         grafo.addEdge("NC3", "NC2", calcularDistancia(486, 176, 462, 247), false);
         grafo.addEdge("NC3", "T", calcularDistancia(486, 176, 530, 191), false);
 
@@ -530,13 +584,104 @@ public class MainController extends Controller implements Initializable {
         grafo.addEdge("NC4", "L", calcularDistancia(331, 350, 297, 434), false);
         grafo.addEdge("NC4", "F", calcularDistancia(331, 350, 388, 373), false);
 
-        // grafo.addEdge("NC5", "H", calcularDistancia(516, 347, 483, 330), false);
-        // grafo.addEdge("NC5", "NC6", calcularDistancia(516, 347, 487, 417), false);
+        //grafo.addEdge("NC5", "H", calcularDistancia(516, 347, 483, 330), false);
+        //grafo.addEdge("NC5", "NC6", calcularDistancia(516, 347, 487, 417), false);
         grafo.addEdge("NC5", "Q", calcularDistancia(516, 347, 555, 360), false);
 
         grafo.addEdge("NC6", "NC5", calcularDistancia(487, 417, 516, 347), false);
         grafo.addEdge("NC6", "G", calcularDistancia(487, 417, 459, 400), false);
         grafo.addEdge("NC6", "NC1", calcularDistancia(487, 417, 507, 423), false);
+
+
+
+        edges.add(grafo.addEdge("0", "28", calcularDistancia(37, 495, 423, 705), false));
+        edges.add(grafo.addEdge("28", "0", calcularDistancia(423, 705, 37, 495), false));
+        edges.add(grafo.addEdge("0", "1", calcularDistancia(37, 495, 127, 401), false));
+        edges.add(grafo.addEdge("1", "0", calcularDistancia(127, 401, 37, 495), false));
+        edges.add(grafo.addEdge("1", "2", calcularDistancia(127, 401, 180, 348), false));
+        edges.add(grafo.addEdge("2", "1", calcularDistancia(180, 348, 127, 401), false));
+        edges.add(grafo.addEdge("2", "3", calcularDistancia(180, 348, 221, 301), false));
+        edges.add(grafo.addEdge("2", "V", calcularDistancia(180, 348, 223, 384), false));
+        edges.add(grafo.addEdge("V", "2", calcularDistancia(223, 384, 180, 348), false));
+        edges.add(grafo.addEdge("3", "2", calcularDistancia(221, 301, 180, 348), false));
+        edges.add(grafo.addEdge("3", "X", calcularDistancia(221, 301, 267, 318), false));
+        edges.add(grafo.addEdge("X", "3", calcularDistancia(267, 318, 221, 301), false));
+        edges.add(grafo.addEdge("3", "4", calcularDistancia(221, 301, 269, 247), false));
+        edges.add(grafo.addEdge("4", "3", calcularDistancia(269, 247, 221, 301), false));
+        edges.add(grafo.addEdge("4", "B", calcularDistancia(269, 247, 349, 274), false));
+        edges.add(grafo.addEdge("4", "5", calcularDistancia(269, 247, 299, 214), false));
+        edges.add(grafo.addEdge("5", "4", calcularDistancia(299, 214, 269, 247), false));
+        edges.add(grafo.addEdge("C", "5", calcularDistancia(369, 230, 299, 214), false));
+        edges.add(grafo.addEdge("5", "6", calcularDistancia(299, 214, 325, 174), false));
+        edges.add(grafo.addEdge("6", "5", calcularDistancia(325, 174, 299, 214), false));
+        edges.add(grafo.addEdge("6", "7", calcularDistancia(325, 174, 333, 148), false));
+        edges.add(grafo.addEdge("7", "6", calcularDistancia(333, 148, 325, 174), false));
+        edges.add(grafo.addEdge("7", "8", calcularDistancia(333, 148, 352, 36), false));
+        edges.add(grafo.addEdge("8", "7", calcularDistancia(352, 36, 333, 148), false));
+        edges.add(grafo.addEdge("8", "9", calcularDistancia(352, 36, 390, 40), false));
+        edges.add(grafo.addEdge("9", "10", calcularDistancia(390, 40, 406, 49), false));
+        edges.add(grafo.addEdge("10", "9", calcularDistancia(406, 49, 390, 40), false));
+        edges.add(grafo.addEdge("Y", "10", calcularDistancia(440, 157, 406, 49), false));
+        edges.add(grafo.addEdge("10", "11", calcularDistancia(406, 49, 482, 16), false));
+        edges.add(grafo.addEdge("11", "10", calcularDistancia(482, 16, 406, 49), false));
+        edges.add(grafo.addEdge("11", "12", calcularDistancia(482, 16, 487, 34), false));
+        edges.add(grafo.addEdge("12", "11", calcularDistancia(487, 34, 482, 16), false));
+        edges.add(grafo.addEdge("12", "13", calcularDistancia(487, 34, 481, 92), false));
+        edges.add(grafo.addEdge("13", "12", calcularDistancia(481, 92, 487, 34), false));
+        edges.add(grafo.addEdge("13", "14", calcularDistancia(481, 92, 555, 122), false));
+        edges.add(grafo.addEdge("14", "13", calcularDistancia(555, 122, 481, 92), false));
+        edges.add(grafo.addEdge("14", "T", calcularDistancia(555, 122, 530, 191), false));
+        edges.add(grafo.addEdge("14", "Z", calcularDistancia(555, 122, 633, 150), false));
+        edges.add(grafo.addEdge("Z", "14", calcularDistancia(633, 150, 555, 122), false));
+        edges.add(grafo.addEdge("Z", "17", calcularDistancia(633, 150, 648, 133), false));
+        edges.add(grafo.addEdge("15", "14", calcularDistancia(582, 47, 555, 122), false));
+        edges.add(grafo.addEdge("16", "15", calcularDistancia(593, 42, 582, 47), false));
+        edges.add(grafo.addEdge("16", "17", calcularDistancia(593, 42, 648, 133), false));
+        edges.add(grafo.addEdge("17", "16", calcularDistancia(648, 133, 593, 42), false));
+        edges.add(grafo.addEdge("17", "18", calcularDistancia(648, 133, 690, 201), false));
+        edges.add(grafo.addEdge("18", "17", calcularDistancia(690, 201, 648, 133), false));
+        edges.add(grafo.addEdge("18", "AA", calcularDistancia(690, 201, 675, 248), false));
+        edges.add(grafo.addEdge("18", "19", calcularDistancia(690, 201, 787, 373), false));
+        edges.add(grafo.addEdge("19", "18", calcularDistancia(787, 373, 690, 201), false));
+        edges.add(grafo.addEdge("19", "BB", calcularDistancia(787, 373, 716, 347), false));
+        edges.add(grafo.addEdge("19", "20", calcularDistancia(787, 373, 755, 446), false));
+        edges.add(grafo.addEdge("20", "19", calcularDistancia(755, 446, 787, 373), false));//YA VEREMOS
+        edges.add(grafo.addEdge("21", "20", calcularDistancia(689, 418, 755, 446), false));
+        edges.add(grafo.addEdge("N", "21", calcularDistancia(623, 390, 689, 418), false));
+        edges.add(grafo.addEdge("22", "21", calcularDistancia(660, 486, 689, 418), false));
+        edges.add(grafo.addEdge("22", "M", calcularDistancia(660, 486, 596, 458), false));
+        edges.add(grafo.addEdge("M", "22", calcularDistancia(596, 458, 660, 486), false));
+        edges.add(grafo.addEdge("M", "24", calcularDistancia(596, 458, 565, 530), false));
+        edges.add(grafo.addEdge("23", "22", calcularDistancia(630, 555, 660, 486), false));
+        edges.add(grafo.addEdge("23", "24", calcularDistancia(630, 555, 565, 530), false));
+        edges.add(grafo.addEdge("24", "23", calcularDistancia(565, 530, 630, 555), false));
+        edges.add(grafo.addEdge("24", "25", calcularDistancia(565, 530, 538, 599), false));
+        edges.add(grafo.addEdge("25", "26", calcularDistancia(538, 599, 463, 576), false));
+        edges.add(grafo.addEdge("26", "25", calcularDistancia(463, 576, 538, 599), false));
+        edges.add(grafo.addEdge("26", "27", calcularDistancia(463, 576, 444, 637), false));
+        edges.add(grafo.addEdge("26", "R", calcularDistancia(463, 576, 484, 505), false));
+        edges.add(grafo.addEdge("27", "26", calcularDistancia(444, 637, 463, 576), false));
+        edges.add(grafo.addEdge("27", "U", calcularDistancia(444, 637, 297, 576), false));
+        edges.add(grafo.addEdge("U", "27", calcularDistancia(297, 576, 444, 637), false));
+        edges.add(grafo.addEdge("27", "28", calcularDistancia(444, 637, 423, 705), false));
+        edges.add(grafo.addEdge("28", "27", calcularDistancia(423, 705, 444, 637), false));
+        edges.add(grafo.addEdge("28", "0", calcularDistancia(423, 705, 37, 495), false));
+        edges.add(grafo.addEdge("0", "28", calcularDistancia(37, 495, 423, 705), false));
+
+
+        edges.add(grafo.addEdge("29", "W", calcularDistancia(208, 475, 249, 406), false));
+        edges.add(grafo.addEdge("W", "29", calcularDistancia(249, 406, 208, 475), false));
+
+        edges.add(grafo.addEdge("L", "30", calcularDistancia(297, 434, 273, 490), false));
+        edges.add(grafo.addEdge("30", "L", calcularDistancia(273, 490, 297, 434), false));
+
+        edges.add(grafo.addEdge("J", "31", calcularDistancia(425, 484, 388, 594), false));
+        edges.add(grafo.addEdge("31", "J", calcularDistancia(388, 594, 425, 484), false));
+
+        edges.add(grafo.addEdge("U", "32", calcularDistancia(297, 576, 133, 499), false));
+        edges.add(grafo.addEdge("32", "U", calcularDistancia(133, 499, 297, 576), false));
+
+
 
         Random rand = new Random();
         Set<MapEdge> processedEdges = new HashSet<>();
@@ -599,5 +744,9 @@ public class MainController extends Controller implements Initializable {
 
     @Override
     public void initialize() {
+    }
+
+    private void guardarCoordenadasDeClick(double x, double y) {
+        System.out.println("Coordenadas del clic: (" + x + ", " + y + ")");
     }
 }
