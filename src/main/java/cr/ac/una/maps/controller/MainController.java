@@ -325,7 +325,7 @@ public class MainController extends Controller implements Initializable {
         final double[] targetY = {ruta.get(1).getY()};
 
         // Calcular el vector de dirección normalizado y la velocidad del movimiento
-        final double velocidad = 1.5; // Ajuste de la velocidad del coche (mayor valor = más rápido)
+        final double velocidad = 1.0; // Ajuste de la velocidad del coche (mayor valor = más rápido)
         final double[] deltaX = {targetX[0] - currentX[0]};
         final double[] deltaY = {targetY[0] - currentY[0]};
         final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
