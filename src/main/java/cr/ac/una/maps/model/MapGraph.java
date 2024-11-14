@@ -19,11 +19,11 @@ public class MapGraph {
         nodes.put(id, new MapNode(id, x, y));
     }
 
-    public MapEdge addEdge(String fromId, String toId, double weight, boolean oneWay) {
+    public MapEdge addEdge(String fromId, String toId, double weight, boolean hasAccident) {
         MapNode from = nodes.get(fromId);
         MapNode to = nodes.get(toId);
         if (from != null && to != null) {
-            MapEdge edge = new MapEdge(from, to, weight, oneWay); // Pasar el parámetro oneWay
+            MapEdge edge = new MapEdge(from, to, weight, hasAccident); // Pasar el parámetro hasAccident
             from.addEdge(edge);
             edges.add(edge);
             return edge; // Devolver la arista creada

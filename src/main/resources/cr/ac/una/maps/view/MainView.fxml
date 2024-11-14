@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import io.github.palexdev.materialfx.controls.MFXSlider?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
@@ -68,7 +69,6 @@
                                     <Button fx:id="btnCerrarAbrir" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onBtnCerrarAbrir" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Cerrar/Abrir" textOverrun="CLIP" />
                                  </children>
                               </VBox>
-                              <Button fx:id="btnAgregarTransito" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#OnActionBtnAgregarTransito" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Heavy Transit" textOverrun="CLIP" />
                            </children>
                         </HBox>
                      </children>
@@ -78,6 +78,12 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </VBox.margin>
                   </TextFlow>
+                  <VBox fx:id="vboxTransito" alignment="TOP_CENTER" layoutX="10.0" layoutY="120.0" prefHeight="134.0" prefWidth="357.0" spacing="20.0">
+                     <children>
+                        <Label styleClass="label-title" text="Transito" />
+                        <MFXSlider fx:id="sliderTransito" />
+                     </children>
+                  </VBox>
                </children>
             </VBox>
          </children>
