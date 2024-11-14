@@ -98,7 +98,7 @@ public class FlowController {
             this.mainStage.setScene(
 
                     //anadi un seteo de resolucion de pantalla
-                    new Scene(FXMLLoader.load(App.class.getResource("/cr/ac/una/maps/view/MainView.fxml"), this.idioma), 1240, 800));
+                    new Scene(FXMLLoader.load(App.class.getResource("/cr/ac/una/maps/view/MainView.fxml"), this.idioma), 1260, 800));
             MFXThemeManager.addOn(this.mainStage.getScene(), Themes.DEFAULT, Themes.LEGACY);
             this.mainStage.show();
         } catch (IOException ex) {

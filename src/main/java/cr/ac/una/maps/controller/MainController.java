@@ -33,8 +33,6 @@ public class MainController extends Controller implements Initializable {
     private Canvas canvas;
     private Canvas canvasRoutes;
 
-    private double currentX;
-    private double currentY;
     private int currentSegment = 0;
 
     @FXML
@@ -49,8 +47,6 @@ public class MainController extends Controller implements Initializable {
     @FXML
     private ComboBox<String> cmbAlgoritmos;
 
-    @FXML
-    private Button btnContinuar;
 
     @FXML
     private Button btnCerrarAbrir;
@@ -68,6 +64,8 @@ public class MainController extends Controller implements Initializable {
     private List<MapNode> rutaPropuesta;
 
     private List<MapNode> rutaRealizada;
+
+    private List<MapNode> rutaInicial;
 
     private Map<String, PathfindingAlgorithm> algorithms;
 
@@ -93,7 +91,6 @@ public class MainController extends Controller implements Initializable {
         algorithms.put("Dijkstra", new DijkstraAlgorithm());
         algorithms.put("Floyd-Warshall", new FloydWarshallAlgorithm());
         cmbAlgoritmos.getItems().addAll(algorithms.keySet());
-        btnContinuar.setVisible(false);
         cmbAlgoritmos.getSelectionModel().selectFirst();
 
         // Crear el canvas para dibujar nodos
@@ -188,7 +185,8 @@ public class MainController extends Controller implements Initializable {
             }
 
             if (!rutaCompleta.isEmpty()) {
-                rutaPropuesta = new ArrayList<>(rutaCompleta);
+                rutaInicial = List.copyOf(rutaCompleta);
+                rutaPropuesta = List.copyOf(rutaInicial);
                 animarRecorridoConCoche(rutaCompleta);
             }
         }
@@ -227,7 +225,7 @@ public class MainController extends Controller implements Initializable {
                 callesCerradas.remove(selectedEdge);
                 pintarCallesCerradas();
                 dibujarCalle(selectedEdge, Color.FLORALWHITE);
-                dibujarRuta(puntosRuta);
+                dibujarRuta(puntosRuta, Color.GREEN);
             }
 
         } else {
@@ -249,12 +247,6 @@ public class MainController extends Controller implements Initializable {
             isPaused = false;
             btnPauseResume.setText("Pausar");
         }
-    }
-
-    @FXML
-    void onAcionContinuar(ActionEvent event) {
-
-        new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Sin implemantar");
     }
 
     @FXML
@@ -388,7 +380,6 @@ public class MainController extends Controller implements Initializable {
     }
 
     private void limpiarCanvas() {
-        btnContinuar.setVisible(false);
         isSelectingNode = true;
         selectedEdge = null;
         GraphicsContext gcNodos = canvas.getGraphicsContext2D();
@@ -437,8 +428,7 @@ public class MainController extends Controller implements Initializable {
                 List<MapNode> ruta = algorithm.findPath(grafo, puntoAnterior, nuevoPunto);
 
                 if (ruta != null && !ruta.isEmpty()) {
-                    dibujarRuta(ruta);
-                    btnContinuar.setVisible(true);
+                    dibujarRuta(ruta, Color.GREEN);
                     isSelectingNode = false;
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
@@ -456,6 +446,7 @@ public class MainController extends Controller implements Initializable {
             }
         }
     }
+
     private void mostrarMensajeAccidente(MapEdge edge) {
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         String path = "cr/ac/una/maps/resources/accident.png";
@@ -476,6 +467,7 @@ public class MainController extends Controller implements Initializable {
 
         accidentMarkers.put(edge, Arrays.asList(new javafx.scene.text.Text("Accidente"), new ImageView(accidentImage)));
     }
+
     private void removerMensajeAccidente(MapEdge edge) {
         accidentMarkers.remove(edge);
         limpiarCanvas();
@@ -506,13 +498,13 @@ public class MainController extends Controller implements Initializable {
 
         rutaRealizada = new ArrayList<>();
 
-
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         Image car = new Image("cr/ac/una/maps/resources/car.png");
         double imageWidth = 30;
         double imageHeight = 50;
 
-        dibujarRuta(ruta);
+        // Dibuja toda la ruta propuesta en verde antes de iniciar la animación
+        dibujarRuta(ruta, Color.GREEN);
 
         final int[] currentSegment = {0};
         final double[] currentX = {ruta.get(0).getX()};
@@ -533,9 +525,11 @@ public class MainController extends Controller implements Initializable {
         timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
             if (!isPaused) { // Solo actualizar si no está en pausa
+                // Actualizar posición del coche
                 currentX[0] += dirX[0];
                 currentY[0] += dirY[0];
 
+                // Comprobar si hemos alcanzado el nodo objetivo
                 if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
                     currentX[0] = targetX[0];
                     currentY[0] = targetY[0];
@@ -557,14 +551,22 @@ public class MainController extends Controller implements Initializable {
                         dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
                     } else {
                         timeline.stop();
-                        mostrarResumenRuta();
+                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Ruta propuesta de color morado, ruta realizada de color lavanda");
+                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Llegaste a tu destino.");
+                        // Al finalizar, limpiar y dibujar la ruta propuesta y la ruta realizada en los colores adecuados
+                        gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+                        pintarCallesCerradas();
+                        dibujarRuta(rutaPropuesta, Color.BLUEVIOLET);  // Ruta propuesta en azul
+                        dibujarRuta(rutaRealizada, Color.LAVENDER);  // Ruta realizada en lavanda
+                        return;
                     }
                 }
 
+                // Limpia todo el canvas y redibuja la ruta completa en cada cuadro
                 gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
                 pintarCallesCerradas();
-                dibujarRuta(ruta);
-
+                dibujarRuta(ruta, Color.LIGHTBLUE); // Ruta realizada en rojo durante la animación
+                // Dibuja el coche en la posición actual
                 double angle = Math.atan2(dirY[0], dirX[0]);
                 double angleDegrees = Math.toDegrees(angle);
                 double imageOrientationOffset = -90;
@@ -582,31 +584,6 @@ public class MainController extends Controller implements Initializable {
         timeline.play();
     }
 
-    private void mostrarResumenRuta() {
-        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
-
-        gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-        limpiarCanvas();
-
-        gc.setStroke(Color.BLUEVIOLET);
-        gc.setLineWidth(2);
-        for (int i = 0; i < rutaPropuesta.size() - 1; i++) {
-            MapNode startNode = rutaPropuesta.get(i);
-            MapNode endNode = rutaPropuesta.get(i + 1);
-            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
-        }
-
-
-        gc.setStroke(Color.LAVENDER);
-        gc.setLineWidth(2);
-        for (int i = 0; i < rutaRealizada.size() - 1; i++) {
-            MapNode startNode = rutaRealizada.get(i);
-            MapNode endNode = rutaRealizada.get(i + 1);
-            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
-        }
-
-        System.out.println("Resumen de la ruta mostrado: Propuesta (verde) y Realizada (rojo).");
-    }
 
     private void togglePauseResume() {
         if (isPaused) {
@@ -647,9 +624,9 @@ public class MainController extends Controller implements Initializable {
         gc.fillOval(nodo.getX() - 5, nodo.getY() - 5, 10, 10); // Dibuja un círculo
     }
 
-    private void dibujarRuta(List<MapNode> ruta) {
-        GraphicsContext gc = canvasRoutes.getGraphicsContext2D(); // Usar el canvas de rutas
-        gc.setStroke(Color.GREEN);
+    private void dibujarRuta(List<MapNode> ruta, Color color) {
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+        gc.setStroke(color); // Usar el color pasado como parámetro
         gc.setLineWidth(3);
 
         if (ruta.isEmpty()) {
@@ -664,6 +641,7 @@ public class MainController extends Controller implements Initializable {
             gc.strokeLine(inicio.getX(), inicio.getY(), fin.getX(), fin.getY());
         }
     }
+
 
     private void inicializarGrafo() {
         // Agregar nodos con los valores de coordenadas ajustados
