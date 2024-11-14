@@ -214,14 +214,21 @@ public class MainController extends Controller implements Initializable {
             if (!rutaCompleta.isEmpty()) {
                 rutaInicial = List.copyOf(rutaCompleta);
                 rutaPropuesta = List.copyOf(rutaInicial);
+
+                // Calcular y mostrar el costo inicial de la ruta
+                calcularCostoInicialRuta(rutaCompleta);
+
+                // Iniciar la animación de la ruta
                 animarRecorridoConCoche(rutaCompleta);
             }
+
         }
 
         for (MapNode punto : puntosRuta) {
             dibujarNodo(punto, Color.RED);
         }
     }
+
 
     @FXML
     void onActionBtnSelectEdge(ActionEvent event) {
@@ -263,7 +270,9 @@ public class MainController extends Controller implements Initializable {
         puntosRuta.clear();
         limpiarCanvas();
         pintarCallesCerradas();
+        textCostoTotal.getChildren().clear(); // Limpiar el TextFlow para iniciar desde cero
         new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Estamos listos para una nueva ruta, selecciona los puntos de inicio y fin para nuestro viaje");
+
         if (timeline != null) {
             timeline.stop();
             timeline = null;
@@ -271,6 +280,7 @@ public class MainController extends Controller implements Initializable {
             btnPauseResume.setText("Pausar");
         }
     }
+
 
     @FXML
     void onBtnCerrarAbrir(ActionEvent event) {
@@ -497,7 +507,11 @@ public class MainController extends Controller implements Initializable {
 
         // Dibujar la ruta recalculada
         dibujarRuta(rutaCompleta, Color.GREEN);
+
+        // Calcular y mostrar el costo inicial de la ruta
+        calcularCostoInicialRuta(rutaCompleta);
     }
+
 
     private void calcularRuta() {
         if (puntosRuta.size() >= 2) {
@@ -1157,6 +1171,40 @@ public class MainController extends Controller implements Initializable {
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion);
     }
+
+
+    private void calcularCostoInicialRuta(List<MapNode> ruta) {
+        double costoInicial = 0.0;
+
+        // Recorrer la lista de nodos en la ruta para calcular el costo en base al peso de las aristas
+        for (int i = 0; i < ruta.size() - 1; i++) {
+            MapNode inicio = ruta.get(i);
+            MapNode fin = ruta.get(i + 1);
+            MapEdge edge = grafo.getEdge(inicio, fin);
+
+            if (edge != null) {
+                // Solo sumamos el peso de la arista, sin considerar tráfico o detenciones
+                costoInicial += edge.getWeight() * COSTO_POR_LONGITUD;
+            }
+        }
+
+        // Mostrar el costo inicial en la interfaz
+        mostrarCostoInicial(costoInicial);
+    }
+
+    private void mostrarCostoInicial(double costoInicial) {
+        textCostoTotal.getChildren().clear();
+        textCostoTotal.getStyleClass().add("textflow-uber");
+
+        Text titulo = new Text("Detalles de Costo Inicial de la Ruta:\n");
+        titulo.getStyleClass().add("costo-total-titulo");
+
+        Text valorTotal = new Text(String.format("Costo Inicial (Peso de aristas): %.2f\n", costoInicial));
+        valorTotal.getStyleClass().add("costo-total-destacado");
+
+        textCostoTotal.getChildren().addAll(titulo, valorTotal);
+    }
+
 
 
 
