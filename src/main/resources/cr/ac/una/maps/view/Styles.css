@@ -90,5 +90,33 @@
         -fx-alignment: center;        /* Alineación del texto al centro */
     }
 
+    .textflow-uber {
+        -fx-background-color: #2c2c2e; /* Fondo oscuro */
+        -fx-padding: 15px;
+        -fx-border-radius: 10px;
+        -fx-background-radius: 10px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 5, 0, 0, 2); /* Sombra */
+    }
+
+    .text-title-uber {
+        -fx-font-size: 14px;
+        -fx-font-weight: bold;
+        -fx-text-fill: #ffffff; /* Blanco para el título */
+    }
+
+    .text-detail-uber {
+        -fx-font-size: 12px;
+        -fx-text-fill: #b0b0b0; /* Gris claro para los detalles */
+    }
+
+    .text-cost-uber {
+        -fx-font-size: 14px;
+        -fx-font-weight: bold;
+        -fx-text-fill: #00ff9d; /* Verde claro para el costo */
+    }
+
+
+
+
 
 }
