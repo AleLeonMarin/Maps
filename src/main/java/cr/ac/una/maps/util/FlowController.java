@@ -35,7 +35,7 @@ public class FlowController {
 
 
     private static final double DEFAULT_WIDTH = 1250;
-    private static final double DEFAULT_HEIGHT = 770;
+    private static final double DEFAULT_HEIGHT = 820;
 
     private FlowController() {
     }
