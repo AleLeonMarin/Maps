@@ -28,7 +28,7 @@ import java.util.*;
 public class MainController extends Controller implements Initializable {
 
     private MapGraph grafo; // Grafo del mapa
-    private MapNode puntoA, puntoB; // Puntos de inicio y destino
+    private List<MapNode> puntosRuta; // Lista de puntos de la ruta
     private Canvas canvas;
     private Canvas canvasRoutes;
 
@@ -67,6 +67,7 @@ public class MainController extends Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        puntosRuta = new ArrayList<>();
         callesCerradas = new HashSet<>();
         isSelectingNode = true;
         grafo = new MapGraph();
@@ -133,46 +134,56 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
-        if (puntoA == null || puntoB == null) {
-            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debe seleccionar los puntos de inicio y destino antes de iniciar.");
+        if (puntosRuta.size() < 2) {
+            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debe seleccionar al menos dos puntos para iniciar la ruta.");
             return;
         }
+
         limpiarCanvas();
 
-        // Detener cualquier animación previa antes de iniciar una nueva
         if (timeline != null) {
             timeline.stop();
             timeline = null;
-            isPaused = false; // Resetear el estado de pausa
+            isPaused = false;
             btnPauseResume.setText("Pausar");
         }
 
-        if (puntoA != null && puntoB != null) {
-            String selectedAlgorithm = cmbAlgoritmos.getValue();
-            PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
+        String selectedAlgorithm = cmbAlgoritmos.getValue();
+        PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
 
-            if (algorithm != null) {
-                List<MapNode> ruta = algorithm.findPath(grafo, puntoA, puntoB);
+        if (algorithm != null) {
+            List<MapNode> rutaCompleta = new ArrayList<>();
+            for (int i = 0; i < puntosRuta.size() - 1; i++) {
+                MapNode puntoInicial = puntosRuta.get(i);
+                MapNode puntoFinal = puntosRuta.get(i + 1);
+                List<MapNode> ruta = algorithm.findPath(grafo, puntoInicial, puntoFinal);
                 if (ruta != null && !ruta.isEmpty()) {
-                    animarRecorridoConCoche(ruta);
+                    // Añadir todos los nodos de la ruta, excepto el primero (para evitar duplicados)
+                    if (i == 0) {
+                        rutaCompleta.addAll(ruta);
+                    } else {
+                        rutaCompleta.addAll(ruta.subList(1, ruta.size()));
+                    }
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
                 }
-            } else {
-                System.out.println("No se seleccionó un algoritmo válido.");
             }
-        } else {
-            System.out.println("Debe seleccionar los puntos de inicio y destino antes de iniciar.");
+
+            if (!rutaCompleta.isEmpty()) {
+                animarRecorridoConCoche(rutaCompleta);
+            }
         }
-        dibujarNodo(puntoA, Color.RED);
-        dibujarNodo(puntoB, Color.BLUE);
-        calcularRuta();
+
+        // Dibujar los puntos de inicio y final
+        for (MapNode punto : puntosRuta) {
+            dibujarNodo(punto, Color.RED);
+        }
     }
+
 
     @FXML
     void onActionBtnNuevaRuta(ActionEvent event) {
-        puntoA = null;
-        puntoB = null;
+        puntosRuta.clear();
         limpiarCanvas();
 
 
@@ -319,7 +330,7 @@ public class MainController extends Controller implements Initializable {
         if (isSelectingNode) {
             seleccionarNodo(x, y);
         } else {
-            seleccionarCalle(x,y);
+            seleccionarCalle(x, y);
         }
     }
 
@@ -332,26 +343,27 @@ public class MainController extends Controller implements Initializable {
         }
 
         if (cmbAlgoritmos.getValue() != null) {
-            if (puntoA == null) {
-                btnContinuar.setVisible(false);
-                puntoA = nodoClic;
-                dibujarNodo(puntoA, Color.RED);
-                puntoB = null;
-            } else if (puntoB == null && nodoClic != puntoA) {
-                puntoB = nodoClic;
-                dibujarNodo(puntoB, Color.BLUE);
-                calcularRuta();
+            puntosRuta.add(nodoClic);
+            dibujarNodo(nodoClic, Color.RED);
+
+            if (puntosRuta.size() > 1) {
+                calcularRuta(); // Calcular la nueva parte de la ruta
             }
         }
     }
 
+
     private void calcularRuta() {
-        if (puntoB != null) {
+        if (puntosRuta.size() >= 2) {
             String selectedAlgorithm = cmbAlgoritmos.getValue();
             PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
 
             if (algorithm != null) {
-                List<MapNode> ruta = algorithm.findPath(grafo, puntoA, puntoB);
+                int lastIndex = puntosRuta.size() - 1;
+                MapNode puntoAnterior = puntosRuta.get(lastIndex - 1);
+                MapNode nuevoPunto = puntosRuta.get(lastIndex);
+                List<MapNode> ruta = algorithm.findPath(grafo, puntoAnterior, nuevoPunto);
+
                 if (ruta != null && !ruta.isEmpty()) {
                     dibujarRuta(ruta);
                     btnContinuar.setVisible(true);
@@ -359,11 +371,10 @@ public class MainController extends Controller implements Initializable {
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
                 }
-            } else {
-                System.out.println("No se seleccionó un algoritmo válido.");
             }
         }
     }
+
 
     private void pintarCallesCerradas() {
         for (MapEdge edge : callesCerradas) {
@@ -385,6 +396,63 @@ public class MainController extends Controller implements Initializable {
         }
 
         return nodoCercano;
+    }
+
+    private void animarRecorridoDesdePosicion(List<MapNode> ruta, double startX, double startY) {
+        if (ruta == null || ruta.size() < 2) {
+            System.out.println("No hay ruta válida para animar.");
+            return;
+        }
+
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+        Image car = new Image("cr/ac/una/maps/resources/car.png");
+        double imageWidth = 30;
+        double imageHeight = 50;
+
+        final int[] currentIndex = {0};
+        final double[] currentX = {startX};
+        final double[] currentY = {startY};
+
+        timeline = new Timeline(new KeyFrame(Duration.millis(20), e -> {
+            if (!isPaused && currentIndex[0] < ruta.size() - 1) {
+                MapNode fromNode = ruta.get(currentIndex[0]);
+                MapNode toNode = ruta.get(currentIndex[0] + 1);
+
+                double deltaX = toNode.getX() - currentX[0];
+                double deltaY = toNode.getY() - currentY[0];
+                double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                double dirX = (deltaX / distance) * 1.0;
+                double dirY = (deltaY / distance) * 1.0;
+
+                currentX[0] += dirX;
+                currentY[0] += dirY;
+
+                if (Math.abs(currentX[0] - toNode.getX()) < 1 && Math.abs(currentY[0] - toNode.getY()) < 1) {
+                    currentIndex[0]++;
+                    currentX[0] = toNode.getX();
+                    currentY[0] = toNode.getY();
+                }
+
+                gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+                pintarCallesCerradas();
+                dibujarRuta(ruta);
+
+                double angle = Math.atan2(dirY, dirX);
+                double angleDegrees = Math.toDegrees(angle);
+                double imageOrientationOffset = -90;
+                double finalAngleDegrees = angleDegrees + imageOrientationOffset;
+
+                gc.save();
+                gc.translate(currentX[0], currentY[0]);
+                gc.rotate(finalAngleDegrees);
+                gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
+                gc.restore();
+            }
+        }));
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
     private void animarRecorridoConCoche(List<MapNode> ruta) {
@@ -463,7 +531,28 @@ public class MainController extends Controller implements Initializable {
 
     private void togglePauseResume() {
         if (isPaused) {
-            timeline.play();
+            // Al reanudar, recalcular la ruta completa con los nuevos puntos añadidos.
+            if (puntosRuta.size() >= 2) {
+                // Detener el `timeline` actual si está en ejecución.
+                if (timeline != null) {
+                    timeline.stop();
+                }
+
+                // Obtener la ruta completa desde el punto actual en adelante
+                List<MapNode> rutaCompleta = new ArrayList<>();
+                for (int i = currentSegment; i < puntosRuta.size() - 1; i++) {
+                    MapNode puntoInicial = puntosRuta.get(i);
+                    MapNode puntoFinal = puntosRuta.get(i + 1);
+                    List<MapNode> ruta = algorithms.get(cmbAlgoritmos.getValue()).findPath(grafo, puntoInicial, puntoFinal);
+                    if (ruta != null && !ruta.isEmpty()) {
+                        rutaCompleta.addAll(ruta.subList(i == currentSegment ? 0 : 1, ruta.size()));
+                    }
+                }
+
+                // Reiniciar la animación con la ruta actualizada.
+                animarRecorridoConCoche(rutaCompleta);
+            }
+
             btnPauseResume.setText("Pausar");
         } else {
             timeline.pause();
