@@ -34,7 +34,7 @@ public class FlowController {
     private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
 
 
-    private static final double DEFAULT_WIDTH = 1195;
+    private static final double DEFAULT_WIDTH = 1250;
     private static final double DEFAULT_HEIGHT = 770;
 
     private FlowController() {
