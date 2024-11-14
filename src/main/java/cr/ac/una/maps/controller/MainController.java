@@ -528,6 +528,9 @@ public class MainController extends Controller implements Initializable {
         return nodoCercano;
     }
 
+    // Nuevas constantes de costo (ajusta según necesidades)
+    private static final double COSTO_POR_LONGITUD = 1.5; // Coste por unidad de longitud (peso)
+
     private void animarRecorridoConCoche(List<MapNode> ruta) {
         if (ruta == null || ruta.size() < 2) {
             System.out.println("No hay ruta válida para animar.");
@@ -549,18 +552,18 @@ public class MainController extends Controller implements Initializable {
         final double[] targetY = {ruta.get(1).getY()};
 
         final double velocidad = 1.0;
-        final double[] costoTotalPeso = {0.0}; // Usar array para que sea final
-        final double[] tiempoDetenidoTotal = {0.0}; // Acumulador para tiempo detenido
+        final double[] costoTotalPeso = {0.0}; // Costo total por longitud
+        final double[] tiempoDetenidoTotal = {0.0}; // Tiempo total detenido
         final double[] deltaX = {targetX[0] - currentX[0]};
         final double[] deltaY = {targetY[0] - currentY[0]};
         final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
         final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
         final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
 
-
         timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
             if (!isPaused) {
+                // Movimiento en la ruta
                 currentX[0] += dirX[0];
                 currentY[0] += dirY[0];
 
@@ -585,10 +588,11 @@ public class MainController extends Controller implements Initializable {
 
                         MapEdge edge = grafo.getEdge(inicio, fin);
                         if (edge != null) {
-                            costoTotalPeso[0] += edge.getWeight() * COSTO_POR_PESO;
+                            costoTotalPeso[0] += edge.getWeight() * COSTO_POR_LONGITUD;
                         }
                     } else {
                         timeline.stop();
+                        // Cálculo final del costo total
                         double costoTotalDetencion = tiempoDetenidoTotal[0] * COSTO_POR_SEGUNDO_DE_DETENCION;
                         double costoTotal = costoTotalPeso[0] + costoTotalDetencion;
 
@@ -612,13 +616,15 @@ public class MainController extends Controller implements Initializable {
                 gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
                 gc.restore();
             } else {
-                tiempoDetenidoTotal[0] += 0.02;
+                // Si está pausado, acumula el tiempo de detención
+                tiempoDetenidoTotal[0] += 0.02; // Tiempo detenido en segundos
             }
         }));
 
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
+
 
 
 
@@ -1007,20 +1013,25 @@ public class MainController extends Controller implements Initializable {
     }
 
     private void calcularCostoRuta(List<MapNode> ruta) {
-        double costoTotal = 0.0;
+        double costoTotalPeso = 0.0;
+        double costoTotalDetencion = 0.0;
 
         for (int i = 0; i < ruta.size() - 1; i++) {
             MapNode inicio = ruta.get(i);
             MapNode fin = ruta.get(i + 1);
             MapEdge edge = grafo.getEdge(inicio, fin);
+
             if (edge != null) {
-                costoTotal += edge.getWeight();
+                costoTotalPeso += edge.getWeight() * COSTO_POR_LONGITUD;
+                // Simula detenciones o cualquier otro cálculo necesario
+                costoTotalDetencion += edge.isHasAccident() ? edge.getWeight() * COSTO_POR_SEGUNDO_DE_DETENCION : 0;
             }
         }
 
-        // Llama al método para mostrar el costo total
-        mostrarCostoTotal(costoTotal,0,0);
+        double costoTotal = costoTotalPeso + costoTotalDetencion;
+        mostrarCostoTotal(costoTotal, costoTotalPeso, costoTotalDetencion);
     }
+
 
 
 
@@ -1028,10 +1039,10 @@ public class MainController extends Controller implements Initializable {
     private void mostrarCostoTotal(double costoTotal, double costoTotalPeso, double costoTotalDetencion) {
         textCostoTotal.getChildren().clear();
 
-        Text titulo = new Text("Costo Total de la Ruta: ");
+        Text titulo = new Text("Detalles de Costo de la Ruta:\n");
         titulo.getStyleClass().add("costo-total-titulo");
 
-        Text valorTotal = new Text(String.format("Total: %.2f\n", costoTotal));
+        Text valorTotal = new Text(String.format("Costo Total: %.2f\n", costoTotal));
         valorTotal.getStyleClass().add("costo-total-valor");
 
         Text valorPeso = new Text(String.format("Costo por Peso: %.2f\n", costoTotalPeso));
@@ -1042,6 +1053,7 @@ public class MainController extends Controller implements Initializable {
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion);
     }
+
 
 
 }

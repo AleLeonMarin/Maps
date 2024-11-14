@@ -129,6 +129,13 @@
         -fx-font-size: 14px;
         -fx-fill: #3366CC;
     }
+    .textflow-uber {
+        -fx-background-color: #2c2c2e; /* Fondo oscuro */
+        -fx-padding: 15px;
+        -fx-border-radius: 10px;
+        -fx-background-radius: 10px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 5, 0, 0, 2); /* Sombra */
+    }
 
 
 
