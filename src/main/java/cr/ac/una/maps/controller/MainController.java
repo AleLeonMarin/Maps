@@ -1,5 +1,6 @@
 package cr.ac.una.maps.controller;
 
+import com.sun.javafx.geom.Edge;
 import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
@@ -231,16 +232,20 @@ public class MainController extends Controller implements Initializable {
                 callesCerradas.add(selectedEdge);
                 pintarCallesCerradas();
             } else {
-                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha removido el accidente");
+                System.out.println("REVISANDO");
+                System.out.println(selectedEdge);
                 selectedEdge.setClosed(false);
-                removerMensajeAccidente(selectedEdge);
                 callesCerradas.remove(selectedEdge);
-                pintarCallesCerradas();
+                System.out.println("REVISANDOsdadasdasdasdasd");
+                System.out.println(callesCerradas);
+                accidentMarkers.remove(selectedEdge);
+                MapEdge edge = selectedEdge;
+                limpiarCanvas();
+                dibujarCalle(edge, Color.BLACK);
+                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha removido el accidente");
             }
-
         } else {
             new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debes seleccionar la opcion de seleccionar ruta para poder cerrar una calle");
-
         }
     }
 
@@ -254,7 +259,8 @@ public class MainController extends Controller implements Initializable {
         this.vboxTransito.setVisible(false);
         puntosRuta.clear();
         limpiarCanvas();
-
+        pintarCallesCerradas();
+        new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Estamos listos para una nueva ruta, selecciona los puntos de inicio y fin para nuestro viaje");
         if (timeline != null) {
             timeline.stop();
             timeline = null;
@@ -274,12 +280,15 @@ public class MainController extends Controller implements Initializable {
                 if (selectedEdge.isHasAccident()) {
                     onActionBtnAccident(null);
                 } else {
+                    new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se esta abriendo el carril con completa normaliadad");
                     selectedEdge.setClosed(false);
                     callesCerradas.remove(selectedEdge);
+                    dibujarCalle(selectedEdge, Color.BLACK);
                 }
             } else {
                 callesCerradas.add(selectedEdge);
                 selectedEdge.setClosed(true);
+                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha cerrado el carril seleccionado");
             }
         }
         pintarCallesCerradas();
@@ -288,7 +297,7 @@ public class MainController extends Controller implements Initializable {
     private void seleccionarCalle(double x, double y) {
         if (!isSelectingNode) {
             if (selectedEdge != null) {
-                dibujarCalle(selectedEdge, Color.FLORALWHITE);
+                dibujarCalle(selectedEdge, Color.BLACK);
                 pintarCallesCerradas();
             }
             List<MapEdge> nearbyEdges = new ArrayList<>();
@@ -297,7 +306,6 @@ public class MainController extends Controller implements Initializable {
                     nearbyEdges.add(edge);
                 }
             }
-
             if (!nearbyEdges.isEmpty()) {
                 if (selectedEdge != null && nearbyEdges.contains(selectedEdge)) {
                     int currentIndex = nearbyEdges.indexOf(selectedEdge);
@@ -413,7 +421,6 @@ public class MainController extends Controller implements Initializable {
         GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D();
         gcNodos.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gcRutas.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-        pintarCallesCerradas();
     }
 
     private void manejarClickEnMapa(double x, double y) {
@@ -456,8 +463,6 @@ public class MainController extends Controller implements Initializable {
 
                 if (ruta != null && !ruta.isEmpty()) {
                     dibujarRuta(ruta, Color.GREEN);
-                    isSelectingNode = false;
-
                     // Llamar para calcular y mostrar el costo de la ruta
                     calcularCostoRuta(ruta);
                 } else {
@@ -466,7 +471,6 @@ public class MainController extends Controller implements Initializable {
             }
         }
     }
-
 
 
     private void pintarCallesCerradas() {
@@ -506,11 +510,6 @@ public class MainController extends Controller implements Initializable {
         accidentMarkers.put(edge, Arrays.asList(new javafx.scene.text.Text("Accidente"), new ImageView(accidentImage)));
     }
 
-    private void removerMensajeAccidente(MapEdge edge) {
-        accidentMarkers.remove(edge);
-        limpiarCanvas();
-        pintarCallesCerradas();
-    }
 
     private MapNode encontrarNodoCercano(double x, double y) {
         // Buscar el nodo más cercano basado en las coordenadas
@@ -624,9 +623,6 @@ public class MainController extends Controller implements Initializable {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
-
-
-
 
 
     private void togglePauseResume() {
@@ -1033,9 +1029,6 @@ public class MainController extends Controller implements Initializable {
     }
 
 
-
-
-
     private void mostrarCostoTotal(double costoTotal, double costoTotalPeso, double costoTotalDetencion) {
         textCostoTotal.getChildren().clear();
 
@@ -1053,7 +1046,6 @@ public class MainController extends Controller implements Initializable {
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion);
     }
-
 
 
 }
