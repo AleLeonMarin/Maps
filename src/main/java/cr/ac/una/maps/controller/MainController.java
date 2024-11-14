@@ -4,8 +4,8 @@ import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
-import cr.ac.una.maps.util.AnimationManager;
 import cr.ac.una.maps.util.Mensaje;
+import io.github.palexdev.materialfx.controls.MFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -20,6 +20,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
@@ -56,10 +57,11 @@ public class MainController extends Controller implements Initializable {
     @FXML
     private Button btnAccident;
 
+    @FXML
+    private MFXSlider sliderTransito;
 
     @FXML
-    private Button btnAgregarTransito;
-
+    private VBox vboxTransito;
 
     private List<MapNode> rutaPropuesta;
 
@@ -73,7 +75,8 @@ public class MainController extends Controller implements Initializable {
     private double y;
     private boolean isSelectingNode;
     MapEdge selectedEdge;
-    Set<MapEdge> callesCerradas;
+    private Set<MapEdge> callesCerradas;
+    private Set<MapEdge> callesConTransitoPesado;
 
     private Timeline timeline;
     private boolean isPaused = false;
@@ -85,6 +88,7 @@ public class MainController extends Controller implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         puntosRuta = new ArrayList<>();
         callesCerradas = new HashSet<>();
+        callesConTransitoPesado = new HashSet<>();
         isSelectingNode = true;
         grafo = new MapGraph();
         algorithms = new HashMap<>();
@@ -92,6 +96,7 @@ public class MainController extends Controller implements Initializable {
         algorithms.put("Floyd-Warshall", new FloydWarshallAlgorithm());
         cmbAlgoritmos.getItems().addAll(algorithms.keySet());
         cmbAlgoritmos.getSelectionModel().selectFirst();
+        this.vboxTransito.setVisible(false);
 
         // Crear el canvas para dibujar nodos
         canvas = new Canvas();
@@ -145,11 +150,20 @@ public class MainController extends Controller implements Initializable {
         btnPauseResume.setOnAction(event -> {
             togglePauseResume();
         });
+
+        sliderTransito.setMin(1);
+        sliderTransito.setMax(3);
+        sliderTransito.setValue(1);
+
+        sliderTransito.valueProperty().addListener((obs) -> {
+            setPesoEdge();
+        });
     }
 
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
         if (puntosRuta.size() < 2) {
+            this.vboxTransito.setVisible(false);
             new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debe seleccionar al menos dos puntos para iniciar la ruta.");
             return;
         }
@@ -173,7 +187,6 @@ public class MainController extends Controller implements Initializable {
                 MapNode puntoFinal = puntosRuta.get(i + 1);
                 List<MapNode> ruta = algorithm.findPath(grafo, puntoInicial, puntoFinal);
                 if (ruta != null && !ruta.isEmpty()) {
-                    // Añadir todos los nodos de la ruta, excepto el primero (para evitar duplicados)
                     if (i == 0) {
                         rutaCompleta.addAll(ruta);
                     } else {
@@ -191,22 +204,16 @@ public class MainController extends Controller implements Initializable {
             }
         }
 
-        // Dibujar los puntos de inicio y final
         for (MapNode punto : puntosRuta) {
             dibujarNodo(punto, Color.RED);
         }
     }
 
     @FXML
-    void OnActionBtnAgregarTransito(ActionEvent event) {
-
-    }
-
-    @FXML
     void onActionBtnSelectEdge(ActionEvent event) {
         this.isSelectingNode = false;
+        this.vboxTransito.setVisible(true);
         new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Ya puedes selccionar rutas, recuerda que puedes ir seleccionando rutas haciendo click sobre ellas");
-
     }
 
     @FXML
@@ -224,8 +231,6 @@ public class MainController extends Controller implements Initializable {
                 removerMensajeAccidente(selectedEdge);
                 callesCerradas.remove(selectedEdge);
                 pintarCallesCerradas();
-                dibujarCalle(selectedEdge, Color.FLORALWHITE);
-                dibujarRuta(puntosRuta, Color.GREEN);
             }
 
         } else {
@@ -234,12 +239,11 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
-
     @FXML
     void onActionBtnNuevaRuta(ActionEvent event) {
+        this.vboxTransito.setVisible(false);
         puntosRuta.clear();
         limpiarCanvas();
-
 
         if (timeline != null) {
             timeline.stop();
@@ -257,24 +261,25 @@ public class MainController extends Controller implements Initializable {
     private void cerrarCalleSeleccionada() {
         if (selectedEdge != null) {
             if (selectedEdge.isClosed()) {
-                selectedEdge.setClosed(false);
-                callesCerradas.remove(selectedEdge);
-                dibujarCalle(selectedEdge, Color.PAPAYAWHIP);
+                if (selectedEdge.isHasAccident()) {
+                    onActionBtnAccident(null);
+                } else {
+                    selectedEdge.setClosed(false);
+                    callesCerradas.remove(selectedEdge);
+                }
             } else {
                 callesCerradas.add(selectedEdge);
                 selectedEdge.setClosed(true);
-                dibujarCalle(selectedEdge, Color.RED);
             }
         }
+        pintarCallesCerradas();
     }
 
     private void seleccionarCalle(double x, double y) {
         if (!isSelectingNode) {
             if (selectedEdge != null) {
                 dibujarCalle(selectedEdge, Color.FLORALWHITE);
-                if (selectedEdge.isClosed()) {
-                    dibujarCalle(selectedEdge, Color.RED);
-                }
+                pintarCallesCerradas();
             }
             List<MapEdge> nearbyEdges = new ArrayList<>();
             for (MapEdge edge : grafo.getEdges()) {
@@ -290,7 +295,6 @@ public class MainController extends Controller implements Initializable {
                 } else {
                     selectedEdge = nearbyEdges.get(0);
                 }
-                System.out.println("Arista seleccionada: " + selectedEdge);
                 dibujarCalle(selectedEdge, Color.AQUAMARINE);
                 animarFlecha(selectedEdge);
             }
@@ -337,6 +341,19 @@ public class MainController extends Controller implements Initializable {
         }));
         timeline.setCycleCount(1);
         timeline.play();
+    }
+
+    private void setPesoEdge() {
+        if (selectedEdge != null && !isSelectingNode) {
+            selectedEdge.setWeight(calcularDistancia(selectedEdge.getFrom().getX(), selectedEdge.getFrom().getY(), selectedEdge.getTo().getX(), selectedEdge.getTo().getY()) * sliderTransito.getValue());
+            if (sliderTransito.getValue() >= 3) {
+                callesConTransitoPesado.add(selectedEdge);
+
+            } else {
+                callesConTransitoPesado.remove(selectedEdge);
+            }
+        }
+        pintarCallesCerradas();
     }
 
     private double distanceToEdge(double x, double y, MapEdge edge) {
@@ -429,7 +446,6 @@ public class MainController extends Controller implements Initializable {
 
                 if (ruta != null && !ruta.isEmpty()) {
                     dibujarRuta(ruta, Color.GREEN);
-                    isSelectingNode = false;
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
                 }
@@ -444,6 +460,13 @@ public class MainController extends Controller implements Initializable {
             if (edge.isHasAccident()) {
                 mostrarMensajeAccidente(edge);
             }
+        }
+        pintarCallesConTransitoPesado();
+    }
+
+    private void pintarCallesConTransitoPesado() {
+        for (MapEdge edge : callesConTransitoPesado) {
+            dibujarCalle(edge, Color.ORANGERED);
         }
     }
 

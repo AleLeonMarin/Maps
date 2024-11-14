@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import io.github.palexdev.materialfx.controls.MFXSlider?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
@@ -13,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="728.0" prefWidth="1250.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.MainController">
+<AnchorPane id="AnchorPane" prefHeight="728.0" prefWidth="1250.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.MainController">
    <children>
       <VBox layoutX="-6.0" layoutY="3.0" prefHeight="689.0" prefWidth="297.0" AnchorPane.topAnchor="3.0">
          <children>
@@ -67,9 +68,14 @@
                                     <Button fx:id="btnCerrarAbrir" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onBtnCerrarAbrir" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Cerrar/Abrir" textOverrun="CLIP" />
                                  </children>
                               </VBox>
-                              <Button fx:id="btnAgregarTransito" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#OnActionBtnAgregarTransito" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Heavy Transit" textOverrun="CLIP" />
                            </children>
                         </HBox>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="vboxTransito" alignment="TOP_CENTER" layoutX="10.0" layoutY="120.0" prefHeight="134.0" prefWidth="357.0" spacing="20.0">
+                     <children>
+                        <Label styleClass="label-title" text="Transito" />
+                        <MFXSlider fx:id="sliderTransito" />
                      </children>
                   </VBox>
                </children>
