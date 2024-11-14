@@ -54,6 +54,10 @@ public class MainController extends Controller implements Initializable {
     @FXML
     private Button btnCerrarAbrir;
 
+    private List<MapNode> rutaPropuesta;
+
+    private List<MapNode> rutaRealizada;
+
     private Map<String, PathfindingAlgorithm> algorithms;
 
     private double x;
@@ -170,6 +174,7 @@ public class MainController extends Controller implements Initializable {
             }
 
             if (!rutaCompleta.isEmpty()) {
+                rutaPropuesta = new ArrayList<>(rutaCompleta);
                 animarRecorridoConCoche(rutaCompleta);
             }
         }
@@ -398,68 +403,14 @@ public class MainController extends Controller implements Initializable {
         return nodoCercano;
     }
 
-    private void animarRecorridoDesdePosicion(List<MapNode> ruta, double startX, double startY) {
-        if (ruta == null || ruta.size() < 2) {
-            System.out.println("No hay ruta válida para animar.");
-            return;
-        }
-
-        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
-        Image car = new Image("cr/ac/una/maps/resources/car.png");
-        double imageWidth = 30;
-        double imageHeight = 50;
-
-        final int[] currentIndex = {0};
-        final double[] currentX = {startX};
-        final double[] currentY = {startY};
-
-        timeline = new Timeline(new KeyFrame(Duration.millis(20), e -> {
-            if (!isPaused && currentIndex[0] < ruta.size() - 1) {
-                MapNode fromNode = ruta.get(currentIndex[0]);
-                MapNode toNode = ruta.get(currentIndex[0] + 1);
-
-                double deltaX = toNode.getX() - currentX[0];
-                double deltaY = toNode.getY() - currentY[0];
-                double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                double dirX = (deltaX / distance) * 1.0;
-                double dirY = (deltaY / distance) * 1.0;
-
-                currentX[0] += dirX;
-                currentY[0] += dirY;
-
-                if (Math.abs(currentX[0] - toNode.getX()) < 1 && Math.abs(currentY[0] - toNode.getY()) < 1) {
-                    currentIndex[0]++;
-                    currentX[0] = toNode.getX();
-                    currentY[0] = toNode.getY();
-                }
-
-                gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-                pintarCallesCerradas();
-                dibujarRuta(ruta);
-
-                double angle = Math.atan2(dirY, dirX);
-                double angleDegrees = Math.toDegrees(angle);
-                double imageOrientationOffset = -90;
-                double finalAngleDegrees = angleDegrees + imageOrientationOffset;
-
-                gc.save();
-                gc.translate(currentX[0], currentY[0]);
-                gc.rotate(finalAngleDegrees);
-                gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
-                gc.restore();
-            }
-        }));
-
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
-    }
-
     private void animarRecorridoConCoche(List<MapNode> ruta) {
         if (ruta == null || ruta.size() < 2) {
             System.out.println("No hay ruta válida para animar.");
             return;
         }
+
+        rutaRealizada = new ArrayList<>();
+
 
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         Image car = new Image("cr/ac/una/maps/resources/car.png");
@@ -481,6 +432,9 @@ public class MainController extends Controller implements Initializable {
         final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
         final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
 
+        // Agregar el primer nodo a la ruta realizada
+        rutaRealizada.add(ruta.get(0));
+
         timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
             if (!isPaused) { // Solo actualizar si no está en pausa
@@ -490,6 +444,9 @@ public class MainController extends Controller implements Initializable {
                 if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
                     currentX[0] = targetX[0];
                     currentY[0] = targetY[0];
+
+                    // Agregar el nodo alcanzado a la ruta realizada
+                    rutaRealizada.add(ruta.get(currentSegment[0] + 1));
 
                     if (currentSegment[0] < ruta.size() - 2) {
                         currentSegment[0]++;
@@ -505,6 +462,7 @@ public class MainController extends Controller implements Initializable {
                         dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
                     } else {
                         timeline.stop();
+                        mostrarResumenRuta();
                     }
                 }
 
@@ -527,6 +485,32 @@ public class MainController extends Controller implements Initializable {
 
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+    }
+
+    private void mostrarResumenRuta() {
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+
+        gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+        limpiarCanvas();
+
+        gc.setStroke(Color.BLUEVIOLET);
+        gc.setLineWidth(2);
+        for (int i = 0; i < rutaPropuesta.size() - 1; i++) {
+            MapNode startNode = rutaPropuesta.get(i);
+            MapNode endNode = rutaPropuesta.get(i + 1);
+            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+        }
+
+
+        gc.setStroke(Color.LAVENDER);
+        gc.setLineWidth(2);
+        for (int i = 0; i < rutaRealizada.size() - 1; i++) {
+            MapNode startNode = rutaRealizada.get(i);
+            MapNode endNode = rutaRealizada.get(i + 1);
+            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+        }
+
+        System.out.println("Resumen de la ruta mostrado: Propuesta (verde) y Realizada (rojo).");
     }
 
     private void togglePauseResume() {
