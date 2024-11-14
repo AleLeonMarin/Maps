@@ -15,7 +15,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 
-<AnchorPane id="AnchorPane" prefHeight="728.0" prefWidth="1250.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.MainController">
+<AnchorPane id="AnchorPane" prefHeight="728.0" prefWidth="1250.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.MainController">
    <children>
       <VBox layoutX="-6.0" layoutY="3.0" prefHeight="689.0" prefWidth="297.0" AnchorPane.topAnchor="3.0">
          <children>
@@ -60,17 +60,19 @@
                   <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="96.0" prefHeight="185.0" prefWidth="357.0" spacing="20.0">
                      <children>
                         <Label styleClass="label-title" text="Configuracion de Rutas" />
+                        <Button fx:id="btnSelectEdge" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnSelectEdge" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Select Edge" textOverrun="CLIP" />
+                     </children>
+                  </VBox>
+                  <VBox fx:id="vboxTransito" alignment="TOP_CENTER" layoutX="10.0" layoutY="120.0" prefHeight="134.0" prefWidth="357.0" spacing="20.0">
+                     <children>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                            <children>
                               <Button fx:id="btnAccident" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnAccident" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Accident" textOverrun="CLIP" />
-                              <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
-                                 <children>
-                                    <Button fx:id="btnSelectEdge" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnSelectEdge" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Select Edge" textOverrun="CLIP" />
-                                    <Button fx:id="btnCerrarAbrir" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onBtnCerrarAbrir" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Cerrar/Abrir" textOverrun="CLIP" />
-                                 </children>
-                              </VBox>
+                              <Button fx:id="btnCerrarAbrir" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onBtnCerrarAbrir" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Cerrar/Abrir" textOverrun="CLIP" />
                            </children>
                         </HBox>
+                        <Label styleClass="label-title" text="Transito" />
+                        <MFXSlider fx:id="sliderTransito" />
                      </children>
                   </VBox>
                   <TextFlow fx:id="textCostoTotal" prefHeight="208.0" prefWidth="241.0">
@@ -78,12 +80,6 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </VBox.margin>
                   </TextFlow>
-                  <VBox fx:id="vboxTransito" alignment="TOP_CENTER" layoutX="10.0" layoutY="120.0" prefHeight="134.0" prefWidth="357.0" spacing="20.0">
-                     <children>
-                        <Label styleClass="label-title" text="Transito" />
-                        <MFXSlider fx:id="sliderTransito" />
-                     </children>
-                  </VBox>
                </children>
             </VBox>
          </children>
