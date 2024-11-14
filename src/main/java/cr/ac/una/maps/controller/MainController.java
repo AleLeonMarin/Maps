@@ -467,6 +467,8 @@ public class MainController extends Controller implements Initializable {
     }
 
     private void pintarCallesCerradas() {
+        pintarCallesConTransitoMedio();
+        pintarCallesConTransitoPesado();
         for (MapEdge edge : callesCerradas) {
             if (edge.isClosed()) {
                 dibujarCalle(edge, Color.RED);
@@ -477,8 +479,6 @@ public class MainController extends Controller implements Initializable {
                 callesCerradas.remove(edge);
             }
         }
-        pintarCallesConTransitoPesado();
-        pintarCallesConTransitoMedio();
     }
 
     private void pintarCallesConTransitoPesado() {
@@ -558,25 +558,42 @@ public class MainController extends Controller implements Initializable {
         final double[] targetX = {ruta.get(1).getX()};
         final double[] targetY = {ruta.get(1).getY()};
 
-        final double velocidad = 1.0;
+        final double baseVelocidad = 1.0;
+        final double[] velocidad = {baseVelocidad};
         final double[] costoTotalPeso = {0.0}; // Costo total por longitud
         final double[] tiempoDetenidoTotal = {0.0}; // Tiempo total detenido
         final double[] deltaX = {targetX[0] - currentX[0]};
         final double[] deltaY = {targetY[0] - currentY[0]};
         final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
-        final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
-        final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
+        final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad[0]};
+        final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad[0]};
 
         rutaRealizada.add(ruta.get(0));
 
         timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
             if (!isPaused) {
+                // Ajustar la velocidad según el tráfico
+                MapNode inicio = ruta.get(currentSegment[0]);
+                MapNode fin = ruta.get(currentSegment[0] + 1);
+                MapEdge edge = grafo.getEdge(inicio, fin);
+                if (edge != null) {
+                    if (callesConTransitoPesado.contains(edge)) {
+                        velocidad[0] = baseVelocidad * 0.3; // Reducir la velocidad a 30%
+                    } else if (callesConTransitoMedio.contains(edge)) {
+                        velocidad[0] = baseVelocidad * 0.5; // Reducir la velocidad a 50%
+                    } else {
+                        velocidad[0] = baseVelocidad; // Velocidad normal
+                    }
+                    dirX[0] = (deltaX[0] / distancia[0]) * velocidad[0];
+                    dirY[0] = (deltaY[0] / distancia[0]) * velocidad[0];
+                }
+
                 // Movimiento en la ruta
                 currentX[0] += dirX[0];
                 currentY[0] += dirY[0];
 
-                if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
+                if (Math.abs(currentX[0] - targetX[0]) < velocidad[0] && Math.abs(currentY[0] - targetY[0]) < velocidad[0]) {
                     currentX[0] = targetX[0];
                     currentY[0] = targetY[0];
 
@@ -584,18 +601,17 @@ public class MainController extends Controller implements Initializable {
 
                     if (currentSegment[0] < ruta.size() - 2) {
                         currentSegment[0]++;
-                        MapNode inicio = ruta.get(currentSegment[0]);
-                        MapNode fin = ruta.get(currentSegment[0] + 1);
+                        inicio = ruta.get(currentSegment[0]);
+                        fin = ruta.get(currentSegment[0] + 1);
                         targetX[0] = fin.getX();
                         targetY[0] = fin.getY();
 
                         deltaX[0] = targetX[0] - inicio.getX();
                         deltaY[0] = targetY[0] - inicio.getY();
                         distancia[0] = Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0]);
-                        dirX[0] = (deltaX[0] / distancia[0]) * velocidad;
-                        dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
+                        dirX[0] = (deltaX[0] / distancia[0]) * velocidad[0];
+                        dirY[0] = (deltaY[0] / distancia[0]) * velocidad[0];
 
-                        MapEdge edge = grafo.getEdge(inicio, fin);
                         if (edge != null) {
                             costoTotalPeso[0] += edge.getWeight() * COSTO_POR_LONGITUD;
                         }
@@ -605,9 +621,7 @@ public class MainController extends Controller implements Initializable {
                         double costoTotalDetencion = tiempoDetenidoTotal[0] * COSTO_POR_SEGUNDO_DE_DETENCION;
                         double costoTotal = costoTotalPeso[0] + costoTotalDetencion;
 
-
                         mostrarCostoTotal(costoTotal, costoTotalPeso[0], costoTotalDetencion);
-
 
                         new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Ruta propuesta de color morado, ruta realizada de color lavanda");
                         new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Llegaste a tu destino.");
@@ -702,6 +716,7 @@ public class MainController extends Controller implements Initializable {
             System.out.println("Dibujando línea entre " + inicio.getId() + " y " + fin.getId());
             gc.strokeLine(inicio.getX(), inicio.getY(), fin.getX(), fin.getY());
         }
+        pintarCallesCerradas();
     }
 
 
