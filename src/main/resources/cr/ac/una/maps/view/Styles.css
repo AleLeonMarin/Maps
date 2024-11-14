@@ -1,5 +1,4 @@
 
-
 .mainFxmlClass {
 
 
@@ -10,7 +9,7 @@
         -fx-background-color: #1b1b1b;
     }
 
-    .image-custom{
+    .image-custom {
         -fx-border-width: 3px;
         -fx-border-radius: 20px;
     }
@@ -45,18 +44,18 @@
 
     .combo-box-custom {
         -fx-background-color: #1b1b1b; /* Color de fondo oscuro */
-        -fx-border-color: #ffffff;     /* Color del borde */
-        -fx-border-radius: 10px;       /* Bordes redondeados */
-        -fx-background-radius: 15px;   /* Bordes del fondo redondeados */
-        -fx-padding: 5px;              /* Espaciado interno */
-        -fx-font-size: 12px;           /* Tamaño de la fuente */
-        -fx-text-fill: #ffffff;        /* Color del texto */
-        -fx-pref-width: 120px;         /* Ancho preferido del ComboBox */
+        -fx-border-color: #ffffff; /* Color del borde */
+        -fx-border-radius: 10px; /* Bordes redondeados */
+        -fx-background-radius: 15px; /* Bordes del fondo redondeados */
+        -fx-padding: 5px; /* Espaciado interno */
+        -fx-font-size: 12px; /* Tamaño de la fuente */
+        -fx-text-fill: #ffffff; /* Color del texto */
+        -fx-pref-width: 120px; /* Ancho preferido del ComboBox */
     }
 
     .combo-box-popup .list-cell {
         -fx-background-color: #2c2c2c; /* Fondo de las opciones */
-        -fx-text-fill: #ffffff;        /* Color del texto de las opciones */
+        -fx-text-fill: #ffffff; /* Color del texto de las opciones */
     }
 
     .combo-box-custom:hover {
@@ -69,25 +68,26 @@
 
     .button-custom, .button-custom:pressed, .button-custom:focused, .button-custom:hover, .button-custom:selected {
         -fx-background-color: #1b1b1b; /* Fondo oscuro */
-        -fx-border-color: #5f5f5f;     /* Color del borde */
-        -fx-border-radius: 10px;       /* Bordes redondeados */
-        -fx-background-radius: 15px;   /* Bordes redondeados */
-        -fx-padding: 5px 15px;         /* Espaciado interno del botón */
-        -fx-text-fill: #ffffff;        /* Color del texto */
-        -fx-font-size: 14px;           /* Tamaño de la fuente */
-        -fx-pref-width: 100px;         /* Ancho preferido */
+        -fx-border-color: #5f5f5f; /* Color del borde */
+        -fx-border-radius: 10px; /* Bordes redondeados */
+        -fx-background-radius: 15px; /* Bordes redondeados */
+        -fx-padding: 5px 15px; /* Espaciado interno del botón */
+        -fx-text-fill: #ffffff; /* Color del texto */
+        -fx-font-size: 14px; /* Tamaño de la fuente */
+        -fx-pref-width: 100px; /* Ancho preferido */
     }
+
     .label-title {
-        -fx-font-size: 12px;          /* Tamaño de fuente grande */
-        -fx-font-weight: bold;        /* Texto en negrita */
-        -fx-text-fill: #ffffff;       /* Color del texto blanco */
+        -fx-font-size: 12px; /* Tamaño de fuente grande */
+        -fx-font-weight: bold; /* Texto en negrita */
+        -fx-text-fill: #ffffff; /* Color del texto blanco */
         -fx-background-color: #474747; /* Color de fondo azul */
-        -fx-padding: 10px;            /* Espaciado interno */
-        -fx-border-color: #2a2a2a;    /* Color del borde */
-        -fx-border-width: 2px;        /* Ancho del borde */
-        -fx-border-radius: 5px;       /* Bordes redondeados */
-        -fx-background-radius: 5px;   /* Bordes del fondo redondeados */
-        -fx-alignment: center;        /* Alineación del texto al centro */
+        -fx-padding: 10px; /* Espaciado interno */
+        -fx-border-color: #2a2a2a; /* Color del borde */
+        -fx-border-width: 2px; /* Ancho del borde */
+        -fx-border-radius: 5px; /* Bordes redondeados */
+        -fx-background-radius: 5px; /* Bordes del fondo redondeados */
+        -fx-alignment: center; /* Alineación del texto al centro */
     }
 
     .textflow-uber {
@@ -117,8 +117,20 @@
         -fx-font-weight: bold;
     }
 
+    .ruta-en-curso {
+        -fx-background-color: #ADD8E6;
+        -fx-background-radius: 10px; /* Puedes ajustar el valor según el nivel de redondeo que desees */
+    }
 
+    .ruta-propuesta {
+        -fx-background-color: #8A2BE2;
+        -fx-background-radius: 10px;
+    }
 
+    .ruta-realizada {
+        -fx-background-color: #E6E6FA;
+        -fx-background-radius: 10px;
+    }
 
 
 }
