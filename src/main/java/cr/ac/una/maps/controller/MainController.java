@@ -560,6 +560,8 @@ public class MainController extends Controller implements Initializable {
         final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
         final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
 
+        rutaRealizada.add(ruta.get(0));
+
         timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
             if (!isPaused) {
@@ -596,7 +598,19 @@ public class MainController extends Controller implements Initializable {
                         double costoTotalDetencion = tiempoDetenidoTotal[0] * COSTO_POR_SEGUNDO_DE_DETENCION;
                         double costoTotal = costoTotalPeso[0] + costoTotalDetencion;
 
+
                         mostrarCostoTotal(costoTotal, costoTotalPeso[0], costoTotalDetencion);
+
+
+                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Ruta propuesta de color morado, ruta realizada de color lavanda");
+                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Llegaste a tu destino.");
+                        // Al finalizar, limpiar y dibujar la ruta propuesta y la ruta realizada en los colores adecuados
+                        gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+                        pintarCallesCerradas();
+                        dibujarRuta(ruta, Color.LIGHTBLUE);
+                        dibujarRuta(rutaPropuesta, Color.BLUEVIOLET);  // Ruta propuesta en azul
+                        dibujarRuta(rutaRealizada, Color.LAVENDER);  // Ruta realizada en lavanda
+
                         return;
                     }
                 }
