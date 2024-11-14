@@ -72,7 +72,7 @@ public class MapGraph {
             if (actual.getId().equals(fin)) break;
 
             for (MapEdge arista : actual.getEdges()) {
-                if (!arista.isClosed() && (!arista.isOneWay() || arista.getFrom().equals(actual))) {
+                if (!arista.isClosed() && (!arista.isHasAccident() || arista.getFrom().equals(actual))) {
                     MapNode vecino = arista.getTo();
                     double nuevaDistancia = distancias.get(actual) + arista.getWeight();
                     if (nuevaDistancia < distancias.get(vecino)) {
@@ -123,7 +123,7 @@ public class MapGraph {
                 next[fromIndex][toIndex] = toIndex;
 
                 // Solo configurar la distancia de regreso `to` a `from` si la arista no es unidireccional
-                if (edge.isOneWay()) {
+                if (edge.isHasAccident()) {
                     distance[toIndex][fromIndex] = edge.getWeight();
                     next[toIndex][fromIndex] = fromIndex;
                 }

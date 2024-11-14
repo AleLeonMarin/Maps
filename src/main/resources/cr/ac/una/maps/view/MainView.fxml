@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="728.0" prefWidth="1175.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.MainController">
+<AnchorPane id="AnchorPane" prefHeight="728.0" prefWidth="1175.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.MainController">
    <children>
       <VBox layoutX="-6.0" layoutY="3.0" prefHeight="689.0" prefWidth="297.0" AnchorPane.topAnchor="3.0">
          <children>
@@ -41,13 +41,16 @@
                   <ComboBox fx:id="cmbAlgoritmos" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="33.0" prefWidth="125.0" styleClass="combo-box-custom" />
                </children>
             </HBox>
-            <VBox alignment="BOTTOM_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="225.0" prefWidth="297.0" spacing="10.0">
+            <VBox alignment="BOTTOM_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="399.0" prefWidth="297.0" spacing="10.0">
                <children>
                   <Button contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnNuevaRuta" prefHeight="32.0" prefWidth="144.0" styleClass="button-custom" text="Nueva Ruta" textOverrun="CLIP" VBox.vgrow="ALWAYS" />
                   <Button contentDisplay="CENTER" layoutX="109.0" layoutY="27.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnIniciar" prefHeight="32.0" prefWidth="144.0" styleClass="button-custom" text="Iniciar " textOverrun="CLIP" VBox.vgrow="ALWAYS" />
                   <Button fx:id="btnContinuar" contentDisplay="CENTER" layoutX="109.0" layoutY="43.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onAcionContinuar" prefHeight="32.0" prefWidth="144.0" styleClass="button-custom" text="Continuar Camino" textOverrun="CLIP" />
                   <Button fx:id="btnCerrarAbrir" contentDisplay="CENTER" layoutX="109.0" layoutY="59.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onBtnCerrarAbrir" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Cerrar/Abrir" textOverrun="CLIP" />
                   <Button fx:id="btnPauseResume" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" textOverrun="CLIP" />
+                  <Button fx:id="btnSelectEdge" contentDisplay="CENTER" layoutX="109.0" layoutY="203.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnSelectEdge" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Select Edge" textOverrun="CLIP" />
+                  <Button fx:id="btnAgregarTransito" contentDisplay="CENTER" layoutX="109.0" layoutY="203.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#OnActionBtnAgregarTransito" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Heavy Transit" textOverrun="CLIP" />
+                  <Button fx:id="btnAccident" contentDisplay="CENTER" layoutX="109.0" layoutY="292.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onActionBtnAccident" prefHeight="32.0" prefWidth="122.0" styleClass="button-custom" text="Accident" textOverrun="CLIP" />
                </children>
             </VBox>
          </children>
@@ -61,7 +64,7 @@
                         <Image url="@../resources/map.png" />
                      </image>
                   </ImageView>
-                  <Canvas fx:id="canvasRoutes" />
+                  <Canvas fx:id="canvasRoutes" height="714.0" width="876.0" />
                </children>
             </StackPane>
          </children>

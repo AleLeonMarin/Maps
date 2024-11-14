@@ -6,6 +6,7 @@ import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
 import cr.ac.una.maps.util.AnimationManager;
 import cr.ac.una.maps.util.Mensaje;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -53,6 +54,16 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     private Button btnCerrarAbrir;
+    @FXML
+    private Button btnSelectEdge;
+
+    @FXML
+    private Button btnAccident;
+
+
+    @FXML
+    private Button btnAgregarTransito;
+
 
     private List<MapNode> rutaPropuesta;
 
@@ -68,6 +79,9 @@ public class MainController extends Controller implements Initializable {
 
     private Timeline timeline;
     private boolean isPaused = false;
+
+    private Map<MapEdge, List<javafx.scene.Node>> accidentMarkers = new HashMap<>();
+
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -185,6 +199,43 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
+    @FXML
+    void OnActionBtnAgregarTransito(ActionEvent event) {
+
+    }
+
+    @FXML
+    void onActionBtnSelectEdge(ActionEvent event) {
+        this.isSelectingNode = false;
+        new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Ya puedes selccionar rutas, recuerda que puedes ir seleccionando rutas haciendo click sobre ellas");
+
+    }
+
+    @FXML
+    void onActionBtnAccident(ActionEvent event) {
+        if (!isSelectingNode && selectedEdge != null) {
+            this.selectedEdge.setHasAccident(!selectedEdge.isHasAccident());
+            if (selectedEdge.isHasAccident()) {
+                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha reportado un accidente, la calle esta cerrada");
+                selectedEdge.setClosed(true);
+                callesCerradas.add(selectedEdge);
+                pintarCallesCerradas();
+            } else {
+                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha removido el accidente");
+                selectedEdge.setClosed(false);
+                removerMensajeAccidente(selectedEdge);
+                callesCerradas.remove(selectedEdge);
+                pintarCallesCerradas();
+                dibujarCalle(selectedEdge, Color.FLORALWHITE);
+                dibujarRuta(puntosRuta);
+            }
+
+        } else {
+            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debes seleccionar la opcion de seleccionar ruta para poder cerrar una calle");
+
+        }
+    }
+
 
     @FXML
     void onActionBtnNuevaRuta(ActionEvent event) {
@@ -229,6 +280,9 @@ public class MainController extends Controller implements Initializable {
         if (!isSelectingNode) {
             if (selectedEdge != null) {
                 dibujarCalle(selectedEdge, Color.FLORALWHITE);
+                if (selectedEdge.isClosed()) {
+                    dibujarCalle(selectedEdge, Color.RED);
+                }
             }
             List<MapEdge> nearbyEdges = new ArrayList<>();
             for (MapEdge edge : grafo.getEdges()) {
@@ -263,22 +317,35 @@ public class MainController extends Controller implements Initializable {
 
         double angle = Math.atan2(y2 - y1, x2 - x1);
         double angleDegrees = Math.toDegrees(angle);
-        ImageView arrowImageView = new ImageView(arrowImage);
-        arrowImageView.setFitWidth(20);
-        arrowImageView.setFitHeight(20);
-        stackpaneMap.getChildren().add(arrowImageView);
-        arrowImageView.setRotate(angleDegrees);
-        arrowImageView.setX(edge.getTo().getX());
-        arrowImageView.setY(edge.getTo().getY());
-        arrowImageView.setVisible(true);
 
-        AnimationManager.getInstance().animateArrowFadeIn(arrowImageView, 1.0); // Duration of 1 second
+        double midX = (x1 + x2) / 2;
+        double midY = (y1 + y2) / 2;
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.0), e -> stackpaneMap.getChildren().remove(arrowImageView)));
+        double offset = 15;
+        double offsetX = offset * Math.cos(angle + Math.PI / 2);
+        double offsetY = offset * Math.sin(angle + Math.PI / 2);
+
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+        gc.save();
+        gc.translate(midX + offsetX, midY + offsetY);
+        gc.rotate(angleDegrees);
+        gc.drawImage(arrowImage, -10, -10, 20, 20);
+        gc.restore();
+
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), canvasRoutes);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.setCycleCount(1);
+        fadeIn.setAutoReverse(false);
+        fadeIn.play();
+
+        // Remove the arrow after the animation is complete
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1.0), e -> {
+            gc.clearRect(midX + offsetX - 10, midY + offsetY - 10, 20, 20); // Clear the arrow from the canvas
+        }));
         timeline.setCycleCount(1);
         timeline.play();
     }
-
 
     private double distanceToEdge(double x, double y, MapEdge edge) {
         double x1 = edge.getFrom().getX();
@@ -384,7 +451,35 @@ public class MainController extends Controller implements Initializable {
     private void pintarCallesCerradas() {
         for (MapEdge edge : callesCerradas) {
             dibujarCalle(edge, Color.RED);
+            if (edge.isHasAccident()) {
+                mostrarMensajeAccidente(edge);
+            }
         }
+    }
+    private void mostrarMensajeAccidente(MapEdge edge) {
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+        String path = "cr/ac/una/maps/resources/accident.png";
+        Image accidentImage = new Image(path);
+
+        double x1 = edge.getFrom().getX();
+        double y1 = edge.getFrom().getY();
+        double x2 = edge.getTo().getX();
+        double y2 = edge.getTo().getY();
+
+        double midX = (x1 + x2) / 2;
+        double midY = (y1 + y2) / 2;
+
+        gc.drawImage(accidentImage, midX - 10, midY - 10, 20, 20);
+
+        gc.setFill(Color.RED);
+        gc.fillText("Accidente", midX + 10, midY - 10);
+
+        accidentMarkers.put(edge, Arrays.asList(new javafx.scene.text.Text("Accidente"), new ImageView(accidentImage)));
+    }
+    private void removerMensajeAccidente(MapEdge edge) {
+        accidentMarkers.remove(edge);
+        limpiarCanvas();
+        pintarCallesCerradas();
     }
 
     private MapNode encontrarNodoCercano(double x, double y) {

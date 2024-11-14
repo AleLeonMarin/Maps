@@ -8,14 +8,14 @@ public class MapEdge {
     private MapNode to;
     private double weight; // Peso de la arista (puede ser distancia, tiempo, etc.)
     private boolean closed; // Estado de la calle (cerrada o abierta)
-    private boolean oneWay; // Si la calle es unidireccional o no
+    private boolean hasAccident; // Si la calle es unidireccional o no
 
-    public MapEdge(MapNode from, MapNode to, double weight, boolean oneWay) {
+    public MapEdge(MapNode from, MapNode to, double weight, boolean hasAccident) {
         this.from = from;
         this.to = to;
         this.weight = weight;
         this.closed = false;  // Por defecto, la calle está abierta
-        this.oneWay = oneWay; // Define si la calle es unidireccional
+        this.hasAccident = hasAccident; // Define si la calle es unidireccional
     }
 
     public double getWeight() {
@@ -25,7 +25,7 @@ public class MapEdge {
 
     @Override
     public String toString() {
-        return from + " -> " + to + " (Weight: " + weight + ", OneWay: " + oneWay + ", Closed: " + closed + ")";
+        return from + " -> " + to + " (Weight: " + weight + ", OneWay: " + hasAccident + ", Closed: " + closed + ")";
     }
 }
 
