@@ -80,6 +80,7 @@ public class MainController extends Controller implements Initializable {
     MapEdge selectedEdge;
     private Set<MapEdge> callesCerradas;
     private Set<MapEdge> callesConTransitoPesado;
+    private Set<MapEdge> callesConTransitoMedio;
 
     private Timeline timeline;
     private boolean isPaused = false;
@@ -95,6 +96,7 @@ public class MainController extends Controller implements Initializable {
         puntosRuta = new ArrayList<>();
         callesCerradas = new HashSet<>();
         callesConTransitoPesado = new HashSet<>();
+        callesConTransitoMedio = new HashSet<>();
         isSelectingNode = true;
         grafo = new MapGraph();
         algorithms = new HashMap<>();
@@ -224,28 +226,23 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     void onActionBtnAccident(ActionEvent event) {
-        if (!isSelectingNode && selectedEdge != null) {
-            this.selectedEdge.setHasAccident(!selectedEdge.isHasAccident());
+        if (selectedEdge != null) {
+            selectedEdge.setHasAccident(!selectedEdge.isHasAccident());
             if (selectedEdge.isHasAccident()) {
-                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha reportado un accidente, la calle esta cerrada");
                 selectedEdge.setClosed(true);
                 callesCerradas.add(selectedEdge);
-                pintarCallesCerradas();
+                dibujarCalle(selectedEdge, Color.RED);
+                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha reportado un accidente, la calle está cerrada");
             } else {
-                System.out.println("REVISANDO");
-                System.out.println(selectedEdge);
                 selectedEdge.setClosed(false);
                 callesCerradas.remove(selectedEdge);
-                System.out.println("REVISANDOsdadasdasdasdasd");
-                System.out.println(callesCerradas);
                 accidentMarkers.remove(selectedEdge);
-                MapEdge edge = selectedEdge;
-                limpiarCanvas();
-                dibujarCalle(edge, Color.BLACK);
+                dibujarCalle(selectedEdge, Color.BLACK);
                 new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha removido el accidente");
             }
+            pintarCallesCerradas();
         } else {
-            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debes seleccionar la opcion de seleccionar ruta para poder cerrar una calle");
+            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debes seleccionar una ruta para poder reportar un accidente");
         }
     }
 
@@ -271,27 +268,22 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     void onBtnCerrarAbrir(ActionEvent event) {
-        cerrarCalleSeleccionada();
-    }
-
-    private void cerrarCalleSeleccionada() {
         if (selectedEdge != null) {
             if (selectedEdge.isClosed()) {
-                if (selectedEdge.isHasAccident()) {
-                    onActionBtnAccident(null);
-                } else {
-                    new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se esta abriendo el carril con completa normaliadad");
-                    selectedEdge.setClosed(false);
-                    callesCerradas.remove(selectedEdge);
-                    dibujarCalle(selectedEdge, Color.BLACK);
-                }
+                selectedEdge.setClosed(false);
+                callesCerradas.remove(selectedEdge);
+                dibujarCalle(selectedEdge, Color.BLACK);
+                new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha abierto el carril seleccionado");
             } else {
-                callesCerradas.add(selectedEdge);
                 selectedEdge.setClosed(true);
+                callesCerradas.add(selectedEdge);
+                dibujarCalle(selectedEdge, Color.RED);
                 new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Se ha cerrado el carril seleccionado");
             }
+            pintarCallesCerradas();
+        } else {
+            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debes seleccionar una ruta para poder cerrar o abrir una calle");
         }
-        pintarCallesCerradas();
     }
 
     private void seleccionarCalle(double x, double y) {
@@ -318,7 +310,6 @@ public class MainController extends Controller implements Initializable {
             }
         }
     }
-
 
     private void animarFlecha(MapEdge edge) {
         String path = edge.isClosed() ? "cr/ac/una/maps/resources/redArrow.png" : "cr/ac/una/maps/resources/greenArrow.png";
@@ -366,9 +357,14 @@ public class MainController extends Controller implements Initializable {
             selectedEdge.setWeight(calcularDistancia(selectedEdge.getFrom().getX(), selectedEdge.getFrom().getY(), selectedEdge.getTo().getX(), selectedEdge.getTo().getY()) * sliderTransito.getValue());
             if (sliderTransito.getValue() >= 3) {
                 callesConTransitoPesado.add(selectedEdge);
-
-            } else {
+                callesConTransitoMedio.remove(selectedEdge);
+            } else if (sliderTransito.getValue() == 2) {
+                callesConTransitoMedio.add(selectedEdge);
                 callesConTransitoPesado.remove(selectedEdge);
+            } else {
+                dibujarCalle(selectedEdge, Color.BLACK);
+                callesConTransitoPesado.remove(selectedEdge);
+                callesConTransitoMedio.remove(selectedEdge);
             }
         }
         pintarCallesCerradas();
@@ -444,11 +440,10 @@ public class MainController extends Controller implements Initializable {
             dibujarNodo(nodoClic, Color.RED);
 
             if (puntosRuta.size() > 1) {
-                calcularRuta(); // Calcular la nueva parte de la ruta
+                calcularRuta();
             }
         }
     }
-
 
     private void calcularRuta() {
         if (puntosRuta.size() >= 2) {
@@ -463,7 +458,6 @@ public class MainController extends Controller implements Initializable {
 
                 if (ruta != null && !ruta.isEmpty()) {
                     dibujarRuta(ruta, Color.GREEN);
-                    // Llamar para calcular y mostrar el costo de la ruta
                     calcularCostoRuta(ruta);
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
@@ -472,23 +466,40 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
-
     private void pintarCallesCerradas() {
         for (MapEdge edge : callesCerradas) {
-            dibujarCalle(edge, Color.RED);
-            if (edge.isHasAccident()) {
-                mostrarMensajeAccidente(edge);
+            if (edge.isClosed()) {
+                dibujarCalle(edge, Color.RED);
+                if (edge.isHasAccident()) {
+                    mostrarMensajeAccidente(edge);
+                }
+            } else {
+                callesCerradas.remove(edge);
             }
         }
         pintarCallesConTransitoPesado();
+        pintarCallesConTransitoMedio();
     }
 
     private void pintarCallesConTransitoPesado() {
         for (MapEdge edge : callesConTransitoPesado) {
-            dibujarCalle(edge, Color.ORANGERED);
+            if (edge.getWeight() > calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 2.5) {
+                dibujarCalle(edge, Color.ORANGE);
+            } else {
+                callesConTransitoPesado.remove(edge);
+            }
         }
     }
 
+    private void pintarCallesConTransitoMedio() {
+        for (MapEdge edge : callesConTransitoMedio) {
+            if ((edge.getWeight() >= calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 1.5)&&(edge.getWeight()<calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 2.5)) {
+                dibujarCalle(edge, Color.YELLOW);
+            } else {
+                callesConTransitoMedio.remove(edge);
+            }
+        }
+    }
     private void mostrarMensajeAccidente(MapEdge edge) {
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         String path = "cr/ac/una/maps/resources/accident.png";
@@ -502,17 +513,15 @@ public class MainController extends Controller implements Initializable {
         double midX = (x1 + x2) / 2;
         double midY = (y1 + y2) / 2;
 
-        gc.drawImage(accidentImage, midX - 10, midY - 10, 20, 20);
+        double imageWidth = 35;
+        double imageHeight = 35;
 
-        gc.setFill(Color.RED);
-        gc.fillText("Accidente", midX + 10, midY - 10);
+        gc.drawImage(accidentImage, midX - imageWidth / 2, midY - imageHeight / 2, imageWidth, imageHeight);
 
-        accidentMarkers.put(edge, Arrays.asList(new javafx.scene.text.Text("Accidente"), new ImageView(accidentImage)));
+        accidentMarkers.put(edge, Collections.singletonList(new ImageView(accidentImage)));
     }
 
-
     private MapNode encontrarNodoCercano(double x, double y) {
-        // Buscar el nodo más cercano basado en las coordenadas
         MapNode nodoCercano = null;
         double distanciaMinima = Double.MAX_VALUE;
 
@@ -527,7 +536,6 @@ public class MainController extends Controller implements Initializable {
         return nodoCercano;
     }
 
-    // Nuevas constantes de costo (ajusta según necesidades)
     private static final double COSTO_POR_LONGITUD = 1.5; // Coste por unidad de longitud (peso)
 
     private void animarRecorridoConCoche(List<MapNode> ruta) {
