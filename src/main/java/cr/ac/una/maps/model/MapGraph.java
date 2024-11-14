@@ -166,4 +166,14 @@ public class MapGraph {
         return path;
     }
 
+    public MapEdge getEdge(MapNode from, MapNode to) {
+        for (MapEdge edge : edges) {
+            if ((edge.getFrom().equals(from) && edge.getTo().equals(to)) ||
+                    (edge.getFrom().equals(to) && edge.getTo().equals(from))) {
+                return edge;
+            }
+        }
+        return null; // Retorna null si no se encuentra una arista entre los nodos
+    }
+
 }

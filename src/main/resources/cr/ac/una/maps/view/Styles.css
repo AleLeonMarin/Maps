@@ -98,24 +98,37 @@
         -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 5, 0, 0, 2); /* Sombra */
     }
 
+    .textflow-uber {
+        -fx-font-size: 10px; /* Ajustar el tamaño de fuente */
+        -fx-padding: 5px;
+    }
+
     .text-title-uber {
-        -fx-font-size: 14px;
+        -fx-font-size: 12px;
         -fx-font-weight: bold;
-        -fx-text-fill: #ffffff; /* Blanco para el título */
     }
 
     .text-detail-uber {
-        -fx-font-size: 12px;
-        -fx-text-fill: #b0b0b0; /* Gris claro para los detalles */
+        -fx-font-size: 10px;
     }
 
     .text-cost-uber {
-        -fx-font-size: 14px;
+        -fx-font-size: 11px;
         -fx-font-weight: bold;
-        -fx-text-fill: #00ff9d; /* Verde claro para el costo */
+        -fx-fill: #0066cc; /* Color opcional */
     }
 
+    /* Agrega esto en tu archivo CSS */
+    .costo-total-titulo {
+        -fx-font-weight: bold;
+        -fx-font-size: 14px;
+        -fx-fill: #2A2A2A;
+    }
 
+    .costo-total-valor {
+        -fx-font-size: 14px;
+        -fx-fill: #3366CC;
+    }
 
 
 

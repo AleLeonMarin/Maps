@@ -21,6 +21,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -77,6 +79,9 @@ public class MainController extends Controller implements Initializable {
 
     private Timeline timeline;
     private boolean isPaused = false;
+
+    @FXML
+    private TextFlow textCostoTotal;
 
     private Map<MapEdge, List<javafx.scene.Node>> accidentMarkers = new HashMap<>();
 
@@ -233,6 +238,10 @@ public class MainController extends Controller implements Initializable {
 
         }
     }
+
+    private static final double COSTO_POR_PESO = 1.5; // Coste por unidad de peso
+    private static final double COSTO_POR_SEGUNDO_DE_DETENCION = 0.5; // Coste por segundo detenido
+
 
 
     @FXML
@@ -430,12 +439,16 @@ public class MainController extends Controller implements Initializable {
                 if (ruta != null && !ruta.isEmpty()) {
                     dibujarRuta(ruta, Color.GREEN);
                     isSelectingNode = false;
+
+                    // Llamar para calcular y mostrar el costo de la ruta
+                    calcularCostoRuta(ruta);
                 } else {
                     System.out.println("No se encontró una ruta entre los nodos seleccionados.");
                 }
             }
         }
     }
+
 
 
     private void pintarCallesCerradas() {
@@ -497,13 +510,11 @@ public class MainController extends Controller implements Initializable {
         }
 
         rutaRealizada = new ArrayList<>();
-
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         Image car = new Image("cr/ac/una/maps/resources/car.png");
         double imageWidth = 30;
         double imageHeight = 50;
 
-        // Dibuja toda la ruta propuesta en verde antes de iniciar la animación
         dibujarRuta(ruta, Color.GREEN);
 
         final int[] currentSegment = {0};
@@ -513,28 +524,25 @@ public class MainController extends Controller implements Initializable {
         final double[] targetY = {ruta.get(1).getY()};
 
         final double velocidad = 1.0;
+        final double[] costoTotalPeso = {0.0}; // Usar array para que sea final
+        final double[] tiempoDetenidoTotal = {0.0}; // Acumulador para tiempo detenido
         final double[] deltaX = {targetX[0] - currentX[0]};
         final double[] deltaY = {targetY[0] - currentY[0]};
         final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
         final double[] dirX = {(deltaX[0] / distancia[0]) * velocidad};
         final double[] dirY = {(deltaY[0] / distancia[0]) * velocidad};
 
-        // Agregar el primer nodo a la ruta realizada
-        rutaRealizada.add(ruta.get(0));
 
         timeline = new Timeline();
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
-            if (!isPaused) { // Solo actualizar si no está en pausa
-                // Actualizar posición del coche
+            if (!isPaused) {
                 currentX[0] += dirX[0];
                 currentY[0] += dirY[0];
 
-                // Comprobar si hemos alcanzado el nodo objetivo
                 if (Math.abs(currentX[0] - targetX[0]) < velocidad && Math.abs(currentY[0] - targetY[0]) < velocidad) {
                     currentX[0] = targetX[0];
                     currentY[0] = targetY[0];
 
-                    // Agregar el nodo alcanzado a la ruta realizada
                     rutaRealizada.add(ruta.get(currentSegment[0] + 1));
 
                     if (currentSegment[0] < ruta.size() - 2) {
@@ -549,24 +557,25 @@ public class MainController extends Controller implements Initializable {
                         distancia[0] = Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0]);
                         dirX[0] = (deltaX[0] / distancia[0]) * velocidad;
                         dirY[0] = (deltaY[0] / distancia[0]) * velocidad;
+
+                        MapEdge edge = grafo.getEdge(inicio, fin);
+                        if (edge != null) {
+                            costoTotalPeso[0] += edge.getWeight() * COSTO_POR_PESO;
+                        }
                     } else {
                         timeline.stop();
-                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Ruta propuesta de color morado, ruta realizada de color lavanda");
-                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Llegaste a tu destino.");
-                        // Al finalizar, limpiar y dibujar la ruta propuesta y la ruta realizada en los colores adecuados
-                        gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-                        pintarCallesCerradas();
-                        dibujarRuta(rutaPropuesta, Color.BLUEVIOLET);  // Ruta propuesta en azul
-                        dibujarRuta(rutaRealizada, Color.LAVENDER);  // Ruta realizada en lavanda
+                        double costoTotalDetencion = tiempoDetenidoTotal[0] * COSTO_POR_SEGUNDO_DE_DETENCION;
+                        double costoTotal = costoTotalPeso[0] + costoTotalDetencion;
+
+                        mostrarCostoTotal(costoTotal, costoTotalPeso[0], costoTotalDetencion);
                         return;
                     }
                 }
 
-                // Limpia todo el canvas y redibuja la ruta completa en cada cuadro
                 gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
                 pintarCallesCerradas();
-                dibujarRuta(ruta, Color.LIGHTBLUE); // Ruta realizada en rojo durante la animación
-                // Dibuja el coche en la posición actual
+                dibujarRuta(ruta, Color.LIGHTBLUE);
+
                 double angle = Math.atan2(dirY[0], dirX[0]);
                 double angleDegrees = Math.toDegrees(angle);
                 double imageOrientationOffset = -90;
@@ -577,12 +586,16 @@ public class MainController extends Controller implements Initializable {
                 gc.rotate(finalAngleDegrees);
                 gc.drawImage(car, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
                 gc.restore();
+            } else {
+                tiempoDetenidoTotal[0] += 0.02;
             }
         }));
 
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
+
+
 
 
     private void togglePauseResume() {
@@ -967,4 +980,43 @@ public class MainController extends Controller implements Initializable {
     private void guardarCoordenadasDeClick(double x, double y) {
         System.out.println("Coordenadas del clic: (" + x + ", " + y + ")");
     }
+
+    private void calcularCostoRuta(List<MapNode> ruta) {
+        double costoTotal = 0.0;
+
+        for (int i = 0; i < ruta.size() - 1; i++) {
+            MapNode inicio = ruta.get(i);
+            MapNode fin = ruta.get(i + 1);
+            MapEdge edge = grafo.getEdge(inicio, fin);
+            if (edge != null) {
+                costoTotal += edge.getWeight();
+            }
+        }
+
+        // Llama al método para mostrar el costo total
+        mostrarCostoTotal(costoTotal,0,0);
+    }
+
+
+
+
+    private void mostrarCostoTotal(double costoTotal, double costoTotalPeso, double costoTotalDetencion) {
+        textCostoTotal.getChildren().clear();
+
+        Text titulo = new Text("Costo Total de la Ruta: ");
+        titulo.getStyleClass().add("costo-total-titulo");
+
+        Text valorTotal = new Text(String.format("Total: %.2f\n", costoTotal));
+        valorTotal.getStyleClass().add("costo-total-valor");
+
+        Text valorPeso = new Text(String.format("Costo por Peso: %.2f\n", costoTotalPeso));
+        valorPeso.getStyleClass().add("costo-total-valor");
+
+        Text valorDetencion = new Text(String.format("Costo por Detención: %.2f\n", costoTotalDetencion));
+        valorDetencion.getStyleClass().add("costo-total-valor");
+
+        textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion);
+    }
+
+
 }
