@@ -435,14 +435,62 @@ public class MainController extends Controller implements Initializable {
             return;
         }
 
-        if (cmbAlgoritmos.getValue() != null) {
+        if (puntosRuta.contains(nodoClic)) {
+            // Si el nodo ya está en la lista, se elimina
+            puntosRuta.remove(nodoClic);
+
+            // Limpiar el canvas de nodos y rutas
+            limpiarCanvas();
+
+            // Redibujar los nodos restantes
+            for (MapNode punto : puntosRuta) {
+                dibujarNodo(punto, Color.RED);
+            }
+
+            // Recalcular y redibujar las rutas entre los nodos restantes
+            if (puntosRuta.size() > 1) {
+                recalcularYRedibujarRutas();
+            }
+        } else {
+            // Si el nodo no está en la lista, se agrega
             puntosRuta.add(nodoClic);
             dibujarNodo(nodoClic, Color.RED);
 
+            // Recalcular y redibujar las rutas si hay más de un nodo
             if (puntosRuta.size() > 1) {
-                calcularRuta();
+                recalcularYRedibujarRutas();
             }
         }
+    }
+
+    private void recalcularYRedibujarRutas() {
+        String selectedAlgorithm = cmbAlgoritmos.getValue();
+        PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
+
+        // Limpiar las rutas en el canvas de rutas
+        GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D();
+        gcRutas.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+
+        // Crear una lista para acumular la ruta completa
+        List<MapNode> rutaCompleta = new ArrayList<>();
+
+        // Recalcular y redibujar la ruta para cada par consecutivo de nodos en puntosRuta
+        for (int i = 0; i < puntosRuta.size() - 1; i++) {
+            MapNode puntoInicial = puntosRuta.get(i);
+            MapNode puntoFinal = puntosRuta.get(i + 1);
+            List<MapNode> ruta = algorithm.findPath(grafo, puntoInicial, puntoFinal);
+
+            if (ruta != null && !ruta.isEmpty()) {
+                if (i == 0) {
+                    rutaCompleta.addAll(ruta);
+                } else {
+                    rutaCompleta.addAll(ruta.subList(1, ruta.size())); // Evitar duplicar el nodo de inicio
+                }
+            }
+        }
+
+        // Dibujar la ruta recalculada
+        dibujarRuta(rutaCompleta, Color.GREEN);
     }
 
     private void calcularRuta() {
