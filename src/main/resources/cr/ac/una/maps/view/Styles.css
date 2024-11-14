@@ -93,49 +93,31 @@
     .textflow-uber {
         -fx-background-color: #2c2c2e; /* Fondo oscuro */
         -fx-padding: 15px;
-        -fx-border-radius: 10px;
-        -fx-background-radius: 10px;
-        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 5, 0, 0, 2); /* Sombra */
+        -fx-border-radius: 12px;
+        -fx-background-radius: 12px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 4); /* Sombra más suave y difusa */
     }
 
-    .textflow-uber {
-        -fx-font-size: 10px; /* Ajustar el tamaño de fuente */
-        -fx-padding: 5px;
-    }
-
-    .text-title-uber {
-        -fx-font-size: 12px;
-        -fx-font-weight: bold;
-    }
-
-    .text-detail-uber {
-        -fx-font-size: 10px;
-    }
-
-    .text-cost-uber {
-        -fx-font-size: 11px;
-        -fx-font-weight: bold;
-        -fx-fill: #0066cc; /* Color opcional */
-    }
-
-    /* Agrega esto en tu archivo CSS */
     .costo-total-titulo {
+        -fx-font-size: 15px;
         -fx-font-weight: bold;
-        -fx-font-size: 14px;
-        -fx-fill: #2A2A2A;
+        -fx-fill: #FFFFFF; /* Color blanco para el título */
+        -fx-opacity: 0.85; /* Un poco de transparencia para suavizar el color */
     }
 
     .costo-total-valor {
         -fx-font-size: 14px;
-        -fx-fill: #3366CC;
+        -fx-fill: #4CAF50; /* Color verde para los valores */
+        -fx-font-weight: normal;
     }
-    .textflow-uber {
-        -fx-background-color: #2c2c2e; /* Fondo oscuro */
-        -fx-padding: 15px;
-        -fx-border-radius: 10px;
-        -fx-background-radius: 10px;
-        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 5, 0, 0, 2); /* Sombra */
+
+    .costo-total-destacado {
+        -fx-font-size: 16px;
+        -fx-fill: #FFD700; /* Color dorado para valores destacados, como el costo total */
+        -fx-font-weight: bold;
     }
+
+
 
 
 

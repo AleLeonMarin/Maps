@@ -39,6 +39,12 @@ public class MainController extends Controller implements Initializable {
 
     private int currentSegment = 0;
 
+
+    private static final double COSTO_TRAFICO_LIVIANO = 0.2;
+    private static final double COSTO_TRAFICO_MODERADO = 0.5;
+    private static final double COSTO_TRAFICO_PESADO = 1.0;
+
+
     @FXML
     private Button btnPauseResume;
 
@@ -635,6 +641,8 @@ public class MainController extends Controller implements Initializable {
                     }
                     dirX[0] = (deltaX[0] / distancia[0]) * velocidad[0];
                     dirY[0] = (deltaY[0] / distancia[0]) * velocidad[0];
+
+
                 }
 
                 // Movimiento en la ruta
@@ -666,10 +674,13 @@ public class MainController extends Controller implements Initializable {
                     } else {
                         timeline.stop();
                         // Cálculo final del costo total
-                        double costoTotalDetencion = tiempoDetenidoTotal[0] * COSTO_POR_SEGUNDO_DE_DETENCION;
-                        double costoTotal = costoTotalPeso[0] + costoTotalDetencion;
+                        double costoPorLongitud = edge.getWeight() * COSTO_POR_LONGITUD;
+                        costoTotalPeso[0] += costoPorLongitud;
+                        double costoDetencionAdicional = edge.getWeight() * (callesConTransitoPesado.contains(edge) ? COSTO_TRAFICO_PESADO :
+                                callesConTransitoMedio.contains(edge) ? COSTO_TRAFICO_MODERADO : COSTO_TRAFICO_LIVIANO);
+                        tiempoDetenidoTotal[0] += costoDetencionAdicional;
 
-                        mostrarCostoTotal(costoTotal, costoTotalPeso[0], costoTotalDetencion);
+                        mostrarCostoTotal(costoTotalPeso[0] + tiempoDetenidoTotal[0], costoTotalPeso[0], tiempoDetenidoTotal[0]);
 
                         new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Ruta propuesta de color morado, ruta realizada de color lavanda");
                         new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Llegaste a tu destino.");
@@ -1103,9 +1114,20 @@ public class MainController extends Controller implements Initializable {
             MapEdge edge = grafo.getEdge(inicio, fin);
 
             if (edge != null) {
-                costoTotalPeso += edge.getWeight() * COSTO_POR_LONGITUD;
-                // Simula detenciones o cualquier otro cálculo necesario
-                costoTotalDetencion += edge.isHasAccident() ? edge.getWeight() * COSTO_POR_SEGUNDO_DE_DETENCION : 0;
+                // Costo por longitud o peso de la arista
+                double costoPorLongitud = edge.getWeight() * COSTO_POR_LONGITUD;
+                costoTotalPeso += costoPorLongitud;
+
+                // Costo adicional basado en el tráfico
+                double costoDetencionAdicional = 0.0;
+                if (callesConTransitoPesado.contains(edge)) {
+                    costoDetencionAdicional = edge.getWeight() * COSTO_TRAFICO_PESADO;
+                } else if (callesConTransitoMedio.contains(edge)) {
+                    costoDetencionAdicional = edge.getWeight() * COSTO_TRAFICO_MODERADO;
+                } else {
+                    costoDetencionAdicional = edge.getWeight() * COSTO_TRAFICO_LIVIANO;
+                }
+                costoTotalDetencion += costoDetencionAdicional;
             }
         }
 
@@ -1114,14 +1136,18 @@ public class MainController extends Controller implements Initializable {
     }
 
 
+
+
+
     private void mostrarCostoTotal(double costoTotal, double costoTotalPeso, double costoTotalDetencion) {
         textCostoTotal.getChildren().clear();
+        textCostoTotal.getStyleClass().add("textflow-uber");
 
         Text titulo = new Text("Detalles de Costo de la Ruta:\n");
         titulo.getStyleClass().add("costo-total-titulo");
 
         Text valorTotal = new Text(String.format("Costo Total: %.2f\n", costoTotal));
-        valorTotal.getStyleClass().add("costo-total-valor");
+        valorTotal.getStyleClass().add("costo-total-destacado");
 
         Text valorPeso = new Text(String.format("Costo por Peso: %.2f\n", costoTotalPeso));
         valorPeso.getStyleClass().add("costo-total-valor");
@@ -1131,6 +1157,7 @@ public class MainController extends Controller implements Initializable {
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion);
     }
+
 
 
 }
