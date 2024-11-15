@@ -1,6 +1,5 @@
 package cr.ac.una.maps.controller;
 
-import com.sun.javafx.geom.Edge;
 import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
@@ -9,9 +8,7 @@ import cr.ac.una.maps.util.Mensaje;
 import io.github.palexdev.materialfx.controls.MFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,8 +29,6 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.*;
 
-import static java.lang.Thread.sleep;
-
 public class MainController extends Controller implements Initializable {
 
     private MapGraph grafo; // Grafo del mapa
@@ -47,6 +42,10 @@ public class MainController extends Controller implements Initializable {
     private static final double COSTO_TRAFICO_LIVIANO = 0.2;
     private static final double COSTO_TRAFICO_MODERADO = 0.5;
     private static final double COSTO_TRAFICO_PESADO = 1.0;
+
+    private double costoTotalPesoAcumulado = 0.0;
+    private double tiempoDetenidoTotalAcumulado = 0.0;
+    private double costoTotalAcumulado = 0.0;
 
 
     @FXML
@@ -149,7 +148,6 @@ public class MainController extends Controller implements Initializable {
             }
         });
 
-        // Manejar clics en el mapa
         stackpaneMap.setOnMouseClicked(event -> {
             x = event.getX();
             y = event.getY();
@@ -166,6 +164,7 @@ public class MainController extends Controller implements Initializable {
         btnPauseResume.setText("Pausar");
 
         btnPauseResume.setOnAction(event -> {
+            this.vboxTransito.setVisible(false);
             togglePauseResume();
         });
 
@@ -181,6 +180,9 @@ public class MainController extends Controller implements Initializable {
     @FXML
     void onActionBtnIniciar(ActionEvent event) {
         if (puntosRuta.size() < 2) {
+            this.costoTotalPesoAcumulado = 0.0;
+            this.tiempoDetenidoTotalAcumulado = 0.0;
+            this.costoTotalAcumulado = 0.0;
             this.vboxTransito.setVisible(false);
             new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Debe seleccionar al menos dos puntos para iniciar la ruta.");
             return;
@@ -219,10 +221,7 @@ public class MainController extends Controller implements Initializable {
                 rutaInicial = List.copyOf(rutaCompleta);
                 rutaPropuesta = List.copyOf(rutaInicial);
 
-                // Calcular y mostrar el costo inicial de la ruta
                 calcularCostoInicialRuta(rutaCompleta);
-
-                // Iniciar la animación de la ruta
                 animarRecorridoConCoche(rutaCompleta);
             }
 
@@ -263,13 +262,11 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
-
-    private static final double COSTO_POR_PESO = 1.5; // Coste por unidad de peso
-    private static final double COSTO_POR_SEGUNDO_DE_DETENCION = 0.5; // Coste por segundo detenido
-
-
     @FXML
     void onActionBtnNuevaRuta(ActionEvent event) {
+        this.costoTotalPesoAcumulado = 0.0;
+        this.tiempoDetenidoTotalAcumulado = 0.0;
+        this.costoTotalAcumulado = 0.0;
         this.vboxTransito.setVisible(false);
         puntosRuta.clear();
         limpiarCanvas();
@@ -527,28 +524,6 @@ public class MainController extends Controller implements Initializable {
         })).play();
     }
 
-
-    private void calcularRuta() {
-        if (puntosRuta.size() >= 2) {
-            String selectedAlgorithm = cmbAlgoritmos.getValue();
-            PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
-
-            if (algorithm != null) {
-                int lastIndex = puntosRuta.size() - 1;
-                MapNode puntoAnterior = puntosRuta.get(lastIndex - 1);
-                MapNode nuevoPunto = puntosRuta.get(lastIndex);
-                List<MapNode> ruta = algorithm.findPath(grafo, puntoAnterior, nuevoPunto);
-
-                if (ruta != null && !ruta.isEmpty()) {
-                    dibujarRuta(ruta, Color.GREEN);
-                    calcularCostoRuta(ruta);
-                } else {
-                    System.out.println("No se encontró una ruta entre los nodos seleccionados.");
-                }
-            }
-        }
-    }
-
     private void pintarCallesCerradas() {
         pintarCallesConTransitoMedio();
         pintarCallesConTransitoPesado();
@@ -645,8 +620,8 @@ public class MainController extends Controller implements Initializable {
 
         final double baseVelocidad = 1.0;
         final double[] velocidad = {baseVelocidad};
-        final double[] costoTotalPeso = {0.0}; // Costo total por longitud
-        final double[] tiempoDetenidoTotal = {0.0}; // Tiempo total detenido
+        final double[] costoTotalPeso = {costoTotalPesoAcumulado};
+        final double[] tiempoDetenidoTotal = {tiempoDetenidoTotalAcumulado}; // Usar el tiempo detenido acumulado
         final double[] deltaX = {targetX[0] - currentX[0]};
         final double[] deltaY = {targetY[0] - currentY[0]};
         final double[] distancia = {Math.sqrt(deltaX[0] * deltaX[0] + deltaY[0] * deltaY[0])};
@@ -672,8 +647,6 @@ public class MainController extends Controller implements Initializable {
                     }
                     dirX[0] = (deltaX[0] / distancia[0]) * velocidad[0];
                     dirY[0] = (deltaY[0] / distancia[0]) * velocidad[0];
-
-
                 }
 
                 // Movimiento en la ruta
@@ -701,12 +674,14 @@ public class MainController extends Controller implements Initializable {
 
                         if (edge != null) {
                             costoTotalPeso[0] += edge.getWeight() * COSTO_POR_LONGITUD;
+                            costoTotalAcumulado += edge.getWeight() * COSTO_POR_LONGITUD;
                         }
                     } else {
                         timeline.stop();
                         // Cálculo final del costo total
                         double costoPorLongitud = edge.getWeight() * COSTO_POR_LONGITUD;
                         costoTotalPeso[0] += costoPorLongitud;
+                        costoTotalAcumulado += costoPorLongitud;
                         double costoDetencionAdicional = edge.getWeight() * (callesConTransitoPesado.contains(edge) ? COSTO_TRAFICO_PESADO :
                                 callesConTransitoMedio.contains(edge) ? COSTO_TRAFICO_MODERADO : COSTO_TRAFICO_LIVIANO);
                         tiempoDetenidoTotal[0] += costoDetencionAdicional;
@@ -747,56 +722,44 @@ public class MainController extends Controller implements Initializable {
         timeline.play();
     }
 
-
     private void togglePauseResume() {
         if (!isPaused && timeline == null) {
-            // Si no está pausado, muestra el mensaje y sale del método
             new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Primero debes iniciar la ruta para poder pausarla.");
             return;
         }
 
         if (isPaused) {
-            // Al reanudar, recalcular la ruta completa con los nuevos puntos añadidos.
-            if (puntosRuta.size() >= 2) {
-                // Detener el `timeline` actual si está en ejecución.
-                if (timeline != null) {
-                    timeline.stop();
-                }
-
-                // Obtener la ruta completa desde el punto actual en adelante
-                List<MapNode> rutaCompleta = new ArrayList<>();
-                for (int i = currentSegment; i < puntosRuta.size() - 1; i++) {
-                    MapNode puntoInicial = puntosRuta.get(i);
-                    MapNode puntoFinal = puntosRuta.get(i + 1);
-                    List<MapNode> ruta = algorithms.get(cmbAlgoritmos.getValue()).findPath(grafo, puntoInicial, puntoFinal);
-                    if (ruta != null && !ruta.isEmpty()) {
-                        rutaCompleta.addAll(ruta.subList(i == currentSegment ? 0 : 1, ruta.size()));
-                    }
-                }
-
-                // Limpiar el canvas de rutas y redibujar
-                GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D(); // Aseguramos inicialización
-                gcRutas.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
-                pintarCallesCerradas();
-                dibujarRuta(rutaCompleta, Color.DARKORANGE);
-
-                // Esperar 1 segundo antes de reanudar la animación
-                PauseTransition pause = new PauseTransition(Duration.seconds(2));
-                pause.setOnFinished(event -> animarRecorridoConCoche(rutaCompleta));
-                pause.play();
-            }
-
+            recalculateRouteFromCurrentNode();
             btnPauseResume.setText("Pausar");
+            timeline.play();
         } else {
-            // Pausar la animación
-            if (timeline != null) {
-                timeline.pause();
-            }
-            btnPauseResume.setText("Reanudar");
+            timeline.pause();
+            btnPauseResume.setText("Resumir");
         }
         isPaused = !isPaused;
     }
 
+    private void recalculateRouteFromCurrentNode() {
+        if (rutaRealizada == null || rutaRealizada.isEmpty()) {
+            return;
+        }
+        MapNode currentNode = rutaRealizada.get(rutaRealizada.size() - 1);
+
+        List<MapNode> remainingRoute = findRemainingRoute(currentNode, rutaPropuesta.get(rutaPropuesta.size() - 1));
+
+        animarRecorridoConCoche(remainingRoute);
+    }
+
+    private List<MapNode> findRemainingRoute(MapNode start, MapNode end) {
+
+        String selectedAlgorithm = cmbAlgoritmos.getValue();
+        PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
+
+        if (algorithm != null) {
+            return algorithm.findPath(grafo, start, end);
+        }
+        return Collections.emptyList();
+    }
 
     private void dibujarNodo(MapNode nodo, Color color) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -1251,7 +1214,6 @@ public class MainController extends Controller implements Initializable {
         mostrarCostoTotal(costoTotal, costoTotalPeso, costoTotalDetencion);
     }
 
-
     private void mostrarCostoTotal(double costoTotal, double costoTotalPeso, double costoTotalDetencion) {
         textCostoTotal.getChildren().clear();
         textCostoTotal.getStyleClass().add("textflow-uber");
@@ -1259,7 +1221,7 @@ public class MainController extends Controller implements Initializable {
         Text titulo = new Text("Detalles de Costo de la Ruta:\n");
         titulo.getStyleClass().add("costo-total-titulo");
 
-        Text valorTotal = new Text(String.format("Costo Total: %.2f\n", costoTotal));
+        Text valorTotal = new Text(String.format("Costo Ruta: %.2f\n", costoTotal));
         valorTotal.getStyleClass().add("costo-total-destacado");
 
         Text valorPeso = new Text(String.format("Costo por Peso: %.2f\n", costoTotalPeso));
@@ -1268,7 +1230,13 @@ public class MainController extends Controller implements Initializable {
         Text valorDetencion = new Text(String.format("Costo por Detención: %.2f\n", costoTotalDetencion));
         valorDetencion.getStyleClass().add("costo-total-valor");
 
-        textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion);
+        Text valorAcumulado = new Text(String.format("Costo Total Acumulado: %.2f\n", costoTotalAcumulado));
+        valorAcumulado.getStyleClass().add("costo-total-destacado");
+
+        textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion, valorAcumulado);
+        this.costoTotalAcumulado = 0;
+        this.costoTotalPesoAcumulado = 0;
+        this.tiempoDetenidoTotalAcumulado = 0;
     }
 
 
@@ -1287,7 +1255,6 @@ public class MainController extends Controller implements Initializable {
             }
         }
 
-        // Mostrar el costo inicial en la interfaz
         mostrarCostoInicial(costoInicial);
     }
 
