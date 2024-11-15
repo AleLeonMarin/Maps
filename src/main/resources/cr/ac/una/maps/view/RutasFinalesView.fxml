@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.TextFlow?>
+
+<AnchorPane id="AnchorPane" prefHeight="780.0" prefWidth="1250.0" styleClass="mainFxmlClass" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cr.ac.una.maps.controller.RutasFinalesController">
+    <children>
+        <VBox alignment="TOP_CENTER" layoutX="-6.0" layoutY="3.0" prefHeight="749.0" prefWidth="360.0" AnchorPane.topAnchor="3.0">
+            <children>
+            <StackPane prefHeight="715.0" prefWidth="320.0" styleClass="stackpane-uber">
+               <VBox.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </VBox.margin>
+               <children>
+                  <VBox alignment="TOP_CENTER" prefHeight="655.0" prefWidth="320.0" StackPane.alignment="TOP_CENTER">
+                     <children>
+                              <ImageView fitHeight="61.0" fitWidth="141.0" pickOnBounds="true" preserveRatio="true">
+                                  <image>
+                                      <Image url="@../resources/logo.png" />
+                                  </image>
+                              </ImageView>
+                        <HBox alignment="CENTER_LEFT" prefHeight="95.0" prefWidth="276.0">
+                           <children>
+                              <ImageView fitHeight="43.0" fitWidth="41.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../resources/149071.png" />
+                                 </image>
+                              </ImageView>
+                              <Label prefHeight="37.0" prefWidth="192.0" text="Kendall Fonseca">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font name="Corbel" size="19.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="55.0" fitWidth="81.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../resources/uber.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </HBox>
+                        <StackPane prefHeight="486.0" prefWidth="276.0" styleClass="combo-box-uber">
+                           <VBox.margin>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </VBox.margin>
+                           <children>
+                              <TextFlow fx:id="textCostoTotal" prefHeight="200.0" prefWidth="200.0" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </VBox>
+               </children>
+            </StackPane>
+            </children>
+        </VBox>
+        <StackPane layoutX="350.0" layoutY="7.0" prefHeight="622.0" prefWidth="782.0" styleClass="image-custom">
+            <children>
+                <StackPane fx:id="stackpaneMap" prefHeight="150.0" prefWidth="200.0">
+                    <children>
+                        <ImageView fx:id="imvMap" fitHeight="714.0" fitWidth="891.0" pickOnBounds="true" preserveRatio="true" styleClass="image-custom">
+                            <image>
+                                <Image url="@../resources/map.png" />
+                            </image>
+                        </ImageView>
+                        <Canvas fx:id="canvasRoutes" height="714.0" width="876.0" />
+                    </children>
+                </StackPane>
+            </children>
+        </StackPane>
+        <AnchorPane layoutX="623.0" layoutY="736.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-propuesta" />
+        <AnchorPane layoutX="847.0" layoutY="735.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-realizada" />
+        <AnchorPane layoutX="1052.0" layoutY="735.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-inicial" />
+      <Button fx:id="btnRutaInicial" layoutX="505.0" layoutY="730.0" mnemonicParsing="false" onAction="#onClickBtnRutaIncial" prefHeight="32.0" prefWidth="98.0" text="Ruta Inicial" />
+      <Button fx:id="btnRutaRealizada" layoutX="706.0" layoutY="730.0" mnemonicParsing="false" onAction="#onClickBtnRutaReaizada" prefHeight="32.0" prefWidth="117.0" text="Ruta Realizada" />
+      <Button fx:id="btnRutaPropuesta" layoutX="910.0" layoutY="731.0" mnemonicParsing="false" onAction="#onClickBtnRutaPropuesta" prefHeight="32.0" prefWidth="117.0" text="Ruta Propuesta" />
+    </children>
+</AnchorPane>

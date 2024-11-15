@@ -147,6 +147,105 @@
         -fx-background-radius: 10px;
     }
 
+    .stackpane-uber {
+        -fx-background-color: linear-gradient(to bottom, #1c1c1e, #121212); /* Gradiente oscuro tipo Uber */
+        -fx-padding: 20px; /* Espaciado interno */
+        -fx-border-color: #2c2c2e; /* Borde oscuro */
+        -fx-border-width: 2px;
+        -fx-border-radius: 10px; /* Bordes redondeados */
+        -fx-background-radius: 10px; /* Bordes del fondo redondeados */
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 15, 0, 0, 5); /* Sombra para dar profundidad */
+    }
+
+    .image-button-uber, .image-button-uber:pressed, .image-button-uber:focused, .image-button-uber:hover, .image-button-uber:selected {
+        -fx-background-color: transparent;
+        -fx-background-radius: 10;
+        -fx-border-radius: 10;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 10, 0, 0, 2); /* Sombra para el botón */
+        -fx-padding: 0;
+        -fx-focus-color: transparent;
+        -fx-faint-focus-color: transparent;
+    }
+
+    .textflow-uber {
+        -fx-background-color: #2c2c2e;
+        -fx-padding: 15px;
+        -fx-border-radius: 12px;
+        -fx-background-radius: 12px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 4); /* Sombra más suave y difusa */
+    }
+
+    .label-uber {
+        -fx-font-size: 14px; /* Tamaño de fuente moderado */
+        -fx-font-weight: bold;
+        -fx-text-fill: #ffffff; /* Color del texto blanco */
+        -fx-background-color: #3a3a3c; /* Fondo oscuro */
+        -fx-padding: 10px;
+        -fx-border-radius: 5px;
+        -fx-background-radius: 5px;
+        -fx-alignment: center;
+    }
+
+    .button-uber, .button-uber:pressed, .button-uber:focused, .button-uber:hover, .button-uber:selected {
+        -fx-background-color: #3a3a3c; /* Fondo oscuro */
+        -fx-border-color: #5f5f5f;
+        -fx-border-radius: 10px;
+        -fx-background-radius: 10px;
+        -fx-padding: 8px 20px;
+        -fx-text-fill: #ffffff;
+        -fx-font-size: 14px;
+        -fx-pref-width: 120px;
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2); /* Sombra ligera */
+    }
+
+    .combo-box-uber {
+        -fx-background-color: #1b1b1b;
+        -fx-border-color: #ffffff;
+        -fx-border-radius: 10px;
+        -fx-background-radius: 10px;
+        -fx-padding: 5px;
+        -fx-text-fill: #ffffff;
+        -fx-pref-width: 150px;
+    }
+
+    .combo-box-popup .list-cell {
+        -fx-background-color: #2c2c2c;
+        -fx-text-fill: #ffffff;
+    }
+
+    .cost-details-uber {
+        -fx-font-size: 13px;
+        -fx-fill: #FFFFFF;
+    }
+
+    .cost-highlight-uber {
+        -fx-font-size: 15px;
+        -fx-fill: #FFD700; /* Color dorado para destacar */
+        -fx-font-weight: bold;
+    }
+
+    .button-uber {
+        -fx-background-color: #000000; /* Color de fondo negro */
+        -fx-text-fill: #FFFFFF; /* Texto blanco */
+        -fx-font-size: 16px; /* Tamaño de fuente */
+        -fx-font-weight: bold; /* Texto en negrita */
+        -fx-padding: 10px 20px; /* Espaciado interno */
+        -fx-background-radius: 5px; /* Bordes redondeados */
+        -fx-border-color: transparent; /* Sin borde visible */
+        -fx-cursor: hand; /* Cambiar cursor al pasar */
+        -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2); /* Sombra sutil */
+    }
+
+    .button-uber:hover {
+        -fx-background-color: #333333; /* Color de fondo más claro al pasar el mouse */
+    }
+
+    .button-uber:pressed {
+        -fx-background-color: #555555; /* Color aún más claro al presionar */
+    }
+
+
+
 
 
 }
