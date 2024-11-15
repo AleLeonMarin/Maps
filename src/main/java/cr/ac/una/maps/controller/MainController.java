@@ -4,11 +4,14 @@ import cr.ac.una.maps.algorithms.DijkstraAlgorithm;
 import cr.ac.una.maps.algorithms.FloydWarshallAlgorithm;
 import cr.ac.una.maps.algorithms.PathfindingAlgorithm;
 import cr.ac.una.maps.model.*;
+import cr.ac.una.maps.util.AppContext;
+import cr.ac.una.maps.util.FlowController;
 import cr.ac.una.maps.util.Mensaje;
 import io.github.palexdev.materialfx.controls.MFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -784,6 +787,8 @@ public class MainController extends Controller implements Initializable {
             gc.strokeLine(inicio.getX(), inicio.getY(), fin.getX(), fin.getY());
         }
         pintarCallesCerradas();
+
+
     }
 
 
@@ -851,11 +856,24 @@ public class MainController extends Controller implements Initializable {
         }
 
         pintarCallesCerradas();
+
+        Platform.runLater(this::abrirVistaRutasFinales);
     }
 
     private String crearSegmentoId(MapNode inicio, MapNode fin) {
         return inicio.getId() + "-" + fin.getId();
     }
+
+    private void abrirVistaRutasFinales() {
+        // Guardar las rutas en AppContext
+        AppContext.getInstance().set("rutaInicial", rutaInicial);
+        AppContext.getInstance().set("rutaPropuesta", rutaPropuesta);
+        AppContext.getInstance().set("rutaRealizada", rutaRealizada);
+
+        // Abrir la vista
+        FlowController.getInstance().goViewInWindow("RutasFinalesView");
+    }
+
 
 
     private void inicializarGrafo() {
@@ -1234,6 +1252,12 @@ public class MainController extends Controller implements Initializable {
         valorAcumulado.getStyleClass().add("costo-total-destacado");
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal, valorPeso, valorDetencion, valorAcumulado);
+
+        AppContext.getInstance().set("costoTotal", costoTotal);
+        AppContext.getInstance().set("costoTotalPeso", costoTotalPeso);
+        AppContext.getInstance().set("costoTotalDetencion", costoTotalDetencion);
+        AppContext.getInstance().set("costoTotalAcumulado", costoTotalAcumulado);
+
         this.costoTotalAcumulado = 0;
         this.costoTotalPesoAcumulado = 0;
         this.tiempoDetenidoTotalAcumulado = 0;
@@ -1269,6 +1293,8 @@ public class MainController extends Controller implements Initializable {
         valorTotal.getStyleClass().add("costo-total-destacado");
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal);
+
+
     }
 
 
