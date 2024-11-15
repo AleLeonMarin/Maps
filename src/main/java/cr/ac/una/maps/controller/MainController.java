@@ -561,13 +561,14 @@ public class MainController extends Controller implements Initializable {
 
     private void pintarCallesConTransitoMedio() {
         for (MapEdge edge : callesConTransitoMedio) {
-            if ((edge.getWeight() >= calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 1.5)&&(edge.getWeight()<calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 2.5)) {
+            if ((edge.getWeight() >= calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 1.5) && (edge.getWeight() < calcularDistancia(edge.getFrom().getX(), edge.getFrom().getY(), edge.getTo().getX(), edge.getTo().getY()) * 2.5)) {
                 dibujarCalle(edge, Color.YELLOW);
             } else {
                 callesConTransitoMedio.remove(edge);
             }
         }
     }
+
     private void mostrarMensajeAccidente(MapEdge edge) {
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
         String path = "cr/ac/una/maps/resources/accident.png";
@@ -696,15 +697,12 @@ public class MainController extends Controller implements Initializable {
 
                         mostrarCostoTotal(costoTotalPeso[0] + tiempoDetenidoTotal[0], costoTotalPeso[0], tiempoDetenidoTotal[0]);
 
-                        new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Ruta propuesta de color morado, ruta realizada de color lavanda");
                         new Mensaje().show(Alert.AlertType.INFORMATION, "Rutas", "Llegaste a tu destino.");
                         // Al finalizar, limpiar y dibujar la ruta propuesta y la ruta realizada en los colores adecuados
                         gc.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
                         pintarCallesCerradas();
                         dibujarRuta(ruta, Color.LIGHTBLUE);
-                        dibujarRuta(rutaPropuesta, Color.BLUEVIOLET);  // Ruta propuesta en azul
-                        dibujarRuta(rutaRealizada, Color.LAVENDER);  // Ruta realizada en lavanda
-
+                        dibujarRutaConCombinacion(rutaRealizada, rutaPropuesta);
                         return;
                     }
                 }
@@ -735,6 +733,12 @@ public class MainController extends Controller implements Initializable {
 
 
     private void togglePauseResume() {
+        if (!isPaused && timeline == null) {
+            // Si no está pausado, muestra el mensaje y sale del método
+            new Mensaje().showModal(Alert.AlertType.INFORMATION, "Rutas", getStage(), "Primero debes iniciar la ruta para poder pausarla.");
+            return;
+        }
+
         if (isPaused) {
             // Al reanudar, recalcular la ruta completa con los nuevos puntos añadidos.
             if (puntosRuta.size() >= 2) {
@@ -754,7 +758,6 @@ public class MainController extends Controller implements Initializable {
                     }
                 }
 
-                // Reiniciar la animación con la ruta actualizada.
                 animarRecorridoConCoche(rutaCompleta);
             }
 
@@ -790,6 +793,76 @@ public class MainController extends Controller implements Initializable {
             gc.strokeLine(inicio.getX(), inicio.getY(), fin.getX(), fin.getY());
         }
         pintarCallesCerradas();
+    }
+
+    private void dibujarRutaConCombinacion(List<MapNode> rutaRealizada, List<MapNode> rutaPropuesta) {
+        GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
+        gc.setLineWidth(3);
+
+        if (rutaRealizada.isEmpty() && rutaPropuesta.isEmpty()) {
+            System.out.println("No se encontró una ruta entre los puntos.");
+            return;
+        }
+
+        // Crear un conjunto de segmentos de la ruta realizada
+        Set<String> segmentosRealizada = new HashSet<>();
+        for (int i = 0; i < rutaRealizada.size() - 1; i++) {
+            MapNode inicio = rutaRealizada.get(i);
+            MapNode fin = rutaRealizada.get(i + 1);
+            segmentosRealizada.add(crearSegmentoId(inicio, fin));
+        }
+
+        // Crear un conjunto de segmentos en común entre rutaRealizada y rutaPropuesta
+        Set<String> segmentosComunes = new HashSet<>();
+        for (int i = 0; i < rutaPropuesta.size() - 1; i++) {
+            MapNode inicio = rutaPropuesta.get(i);
+            MapNode fin = rutaPropuesta.get(i + 1);
+            String segmentoId = crearSegmentoId(inicio, fin);
+
+            // Si el segmento también está en rutaRealizada, es común
+            if (segmentosRealizada.contains(segmentoId)) {
+                segmentosComunes.add(segmentoId);
+            }
+        }
+
+        // Verificar si hay segmentos comunes o no
+        boolean haySegmentosComunes = !segmentosComunes.isEmpty();
+
+        // Dibujar la ruta realizada
+        for (int i = 0; i < rutaRealizada.size() - 1; i++) {
+            MapNode inicio = rutaRealizada.get(i);
+            MapNode fin = rutaRealizada.get(i + 1);
+            String segmentoId = crearSegmentoId(inicio, fin);
+
+            // Si el segmento es común, usar color combinado
+            if (haySegmentosComunes && segmentosComunes.contains(segmentoId)) {
+                gc.setStroke(Color.AQUAMARINE); // Color combinado para segmentos comunes
+            } else {
+                gc.setStroke(Color.LAVENDER); // Color normal para la ruta realizada
+            }
+            gc.strokeLine(inicio.getX(), inicio.getY(), fin.getX(), fin.getY());
+        }
+
+        // Dibujar la ruta propuesta
+        for (int i = 0; i < rutaPropuesta.size() - 1; i++) {
+            MapNode inicio = rutaPropuesta.get(i);
+            MapNode fin = rutaPropuesta.get(i + 1);
+            String segmentoId = crearSegmentoId(inicio, fin);
+
+            // Si el segmento es común y ya ha sido dibujado, omitir
+            if (haySegmentosComunes && segmentosComunes.contains(segmentoId)) {
+                continue; // Saltar el dibujo para evitar superposición
+            }
+
+            gc.setStroke(Color.BLUEVIOLET); // Color normal para la ruta propuesta
+            gc.strokeLine(inicio.getX(), inicio.getY(), fin.getX(), fin.getY());
+        }
+
+        pintarCallesCerradas();
+    }
+
+    private String crearSegmentoId(MapNode inicio, MapNode fin) {
+        return inicio.getId() + "-" + fin.getId();
     }
 
 
@@ -1150,9 +1223,6 @@ public class MainController extends Controller implements Initializable {
     }
 
 
-
-
-
     private void mostrarCostoTotal(double costoTotal, double costoTotalPeso, double costoTotalDetencion) {
         textCostoTotal.getChildren().clear();
         textCostoTotal.getStyleClass().add("textflow-uber");
@@ -1204,8 +1274,6 @@ public class MainController extends Controller implements Initializable {
 
         textCostoTotal.getChildren().addAll(titulo, valorTotal);
     }
-
-
 
 
 }

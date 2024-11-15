@@ -98,11 +98,15 @@
             </StackPane>
          </children>
       </StackPane>
-      <Label layoutX="654.0" layoutY="724.0" styleClass="label-title" text="Ruta Propuesta" />
-      <Label layoutX="357.0" layoutY="724.0" styleClass="label-title" text="Ruta en curso" />
-      <Label layoutX="949.0" layoutY="724.0" styleClass="label-title" text="Ruta Realizada" />
-      <AnchorPane layoutX="470.0" layoutY="732.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-en-curso" />
-      <AnchorPane layoutX="776.0" layoutY="732.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-propuesta" />
-      <AnchorPane layoutX="1064.0" layoutY="732.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-realizada" />
+      <Label layoutX="546.0" layoutY="721.0" styleClass="label-title" text="Ruta Propuesta" />
+      <Label layoutX="387.0" layoutY="722.0" styleClass="label-title" text="Ruta en curso" />
+      <Label layoutX="715.0" layoutY="721.0" styleClass="label-title" text="Ruta Realizada" />
+      <AnchorPane layoutX="505.0" layoutY="729.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-en-curso" />
+      <AnchorPane layoutX="671.0" layoutY="731.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-propuesta" />
+      <AnchorPane layoutX="834.0" layoutY="731.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-realizada" />
+      <Label layoutX="871.0" layoutY="722.0" styleClass="label-title" text="Segmentos iguales" />
+      <AnchorPane layoutX="1011.0" layoutY="732.0" prefHeight="22.0" prefWidth="24.0" styleClass="segmentos-iguales" />
+      <Label layoutX="1043.0" layoutY="724.0" styleClass="label-title" text="Ruta inical" />
+      <AnchorPane layoutX="1138.0" layoutY="733.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-inicial" />
    </children>
 </AnchorPane>

@@ -132,5 +132,15 @@
         -fx-background-radius: 10px;
     }
 
+    .segmentos-iguales {
+        -fx-background-color: #7FFFD4;
+        -fx-background-radius: 10px;
+    }
+
+    .ruta-inicial {
+        -fx-background-color: #008000;
+        -fx-background-radius: 10px;
+    }
+
 
 }
