@@ -142,5 +142,11 @@
         -fx-background-radius: 10px;
     }
 
+    .ruta-a-seguir {
+        -fx-background-color: #FF8C00;
+        -fx-background-radius: 10px;
+    }
+
+
 
 }

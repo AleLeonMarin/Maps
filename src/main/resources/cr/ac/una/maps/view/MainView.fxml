@@ -98,15 +98,17 @@
             </StackPane>
          </children>
       </StackPane>
-      <Label layoutX="546.0" layoutY="721.0" styleClass="label-title" text="Ruta Propuesta" />
-      <Label layoutX="387.0" layoutY="722.0" styleClass="label-title" text="Ruta en curso" />
-      <Label layoutX="715.0" layoutY="721.0" styleClass="label-title" text="Ruta Realizada" />
-      <AnchorPane layoutX="505.0" layoutY="729.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-en-curso" />
-      <AnchorPane layoutX="671.0" layoutY="731.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-propuesta" />
-      <AnchorPane layoutX="834.0" layoutY="731.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-realizada" />
-      <Label layoutX="871.0" layoutY="722.0" styleClass="label-title" text="Segmentos iguales" />
-      <AnchorPane layoutX="1011.0" layoutY="732.0" prefHeight="22.0" prefWidth="24.0" styleClass="segmentos-iguales" />
-      <Label layoutX="1043.0" layoutY="724.0" styleClass="label-title" text="Ruta inical" />
-      <AnchorPane layoutX="1138.0" layoutY="733.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-inicial" />
+      <Label layoutX="507.0" layoutY="726.0" styleClass="label-title" text="Ruta Propuesta" />
+      <Label layoutX="364.0" layoutY="727.0" styleClass="label-title" text="Ruta en curso" />
+      <Label layoutX="656.0" layoutY="726.0" styleClass="label-title" text="Ruta Realizada" />
+      <AnchorPane layoutX="472.0" layoutY="736.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-en-curso" />
+      <AnchorPane layoutX="623.0" layoutY="736.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-propuesta" />
+      <AnchorPane layoutX="767.0" layoutY="737.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-realizada" />
+      <Label layoutX="798.0" layoutY="726.0" styleClass="label-title" text="Segmentos iguales" />
+      <AnchorPane layoutX="932.0" layoutY="736.0" prefHeight="22.0" prefWidth="24.0" styleClass="segmentos-iguales" />
+      <Label layoutX="965.0" layoutY="726.0" styleClass="label-title" text="Ruta inical" />
+      <AnchorPane layoutX="1052.0" layoutY="735.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-inicial" />
+      <Label layoutX="1082.0" layoutY="726.0" styleClass="label-title" text="Ruta a seguir" />
+      <AnchorPane layoutX="1189.0" layoutY="735.0" prefHeight="22.0" prefWidth="24.0" styleClass="ruta-a-seguir" />
    </children>
 </AnchorPane>

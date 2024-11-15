@@ -9,7 +9,9 @@ import cr.ac.una.maps.util.Mensaje;
 import io.github.palexdev.materialfx.controls.MFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -29,6 +31,8 @@ import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.*;
+
+import static java.lang.Thread.sleep;
 
 public class MainController extends Controller implements Initializable {
 
@@ -479,6 +483,7 @@ public class MainController extends Controller implements Initializable {
         }
     }
 
+
     private void recalcularYRedibujarRutas() {
         String selectedAlgorithm = cmbAlgoritmos.getValue();
         PathfindingAlgorithm algorithm = algorithms.get(selectedAlgorithm);
@@ -508,8 +513,18 @@ public class MainController extends Controller implements Initializable {
         // Dibujar la ruta recalculada
         dibujarRuta(rutaCompleta, Color.GREEN);
 
+        // Forzar actualización del canvas usando save y restore
+        gcRutas.save();
+        gcRutas.restore();
+
         // Calcular y mostrar el costo inicial de la ruta
         calcularCostoInicialRuta(rutaCompleta);
+
+        // Usar un Timeline temporal para asegurar el redibujo en el siguiente ciclo de JavaFX
+        new Timeline(new KeyFrame(Duration.millis(10), e -> {
+            canvasRoutes.getGraphicsContext2D().clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+            dibujarRuta(rutaCompleta, Color.GREEN);
+        })).play();
     }
 
 
@@ -548,6 +563,7 @@ public class MainController extends Controller implements Initializable {
             }
         }
     }
+
 
     private void pintarCallesConTransitoPesado() {
         for (MapEdge edge : callesConTransitoPesado) {
@@ -758,12 +774,24 @@ public class MainController extends Controller implements Initializable {
                     }
                 }
 
-                animarRecorridoConCoche(rutaCompleta);
+                // Limpiar el canvas de rutas y redibujar
+                GraphicsContext gcRutas = canvasRoutes.getGraphicsContext2D(); // Aseguramos inicialización
+                gcRutas.clearRect(0, 0, canvasRoutes.getWidth(), canvasRoutes.getHeight());
+                pintarCallesCerradas();
+                dibujarRuta(rutaCompleta, Color.DARKORANGE);
+
+                // Esperar 1 segundo antes de reanudar la animación
+                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                pause.setOnFinished(event -> animarRecorridoConCoche(rutaCompleta));
+                pause.play();
             }
 
             btnPauseResume.setText("Pausar");
         } else {
-            timeline.pause();
+            // Pausar la animación
+            if (timeline != null) {
+                timeline.pause();
+            }
             btnPauseResume.setText("Reanudar");
         }
         isPaused = !isPaused;
@@ -794,6 +822,7 @@ public class MainController extends Controller implements Initializable {
         }
         pintarCallesCerradas();
     }
+
 
     private void dibujarRutaConCombinacion(List<MapNode> rutaRealizada, List<MapNode> rutaPropuesta) {
         GraphicsContext gc = canvasRoutes.getGraphicsContext2D();
