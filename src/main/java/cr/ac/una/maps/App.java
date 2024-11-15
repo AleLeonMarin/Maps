@@ -6,6 +6,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * JavaFX App
@@ -17,7 +18,7 @@ public class App extends Application {
         FlowController.getInstance().InitializeFlow(stage, null);
         FlowController.getInstance().goMain();
         stage.setTitle("Routify");
-        stage.getIcons().add(new Image(getClass().getResource("/cr/ac/una/maps/resources/icon.jpg").toExternalForm()));
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("/cr/ac/una/maps/resources/icon.jpg")).toExternalForm()));
 
     }
 
