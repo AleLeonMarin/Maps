@@ -1,5 +1,3 @@
-// README.md content
-
 # Map Navigation System
 
 ## Overview
